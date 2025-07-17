@@ -4,6 +4,7 @@ export default {
     "./src/frontend/index.html",
     "./src/frontend/**/*.{js,ts,jsx,tsx}",
   ],
+  darkMode: 'class',
   theme: {
     extend: {
       colors: {
@@ -26,7 +27,6 @@ export default {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
-        radius: "var(--radius)",
       },
       borderRadius: {
         lg: "var(--radius)",
