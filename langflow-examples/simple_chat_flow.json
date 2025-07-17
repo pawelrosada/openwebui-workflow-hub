@@ -1,0 +1,88 @@
+{
+  "name": "Simple Chat Flow",
+  "description": "Basic chat flow for Open WebUI integration",
+  "data": {
+    "nodes": [
+      {
+        "id": "chat_input",
+        "type": "ChatInput",
+        "position": { "x": 100, "y": 100 },
+        "data": {
+          "node": {
+            "template": {
+              "input_value": {
+                "type": "str",
+                "value": "",
+                "display_name": "User Message"
+              }
+            }
+          }
+        }
+      },
+      {
+        "id": "openai_llm",
+        "type": "OpenAI",
+        "position": { "x": 400, "y": 100 },
+        "data": {
+          "node": {
+            "template": {
+              "model_name": {
+                "type": "str",
+                "value": "gpt-3.5-turbo",
+                "display_name": "Model"
+              },
+              "openai_api_key": {
+                "type": "str",
+                "value": "your-openai-api-key",
+                "display_name": "API Key"
+              },
+              "temperature": {
+                "type": "float",
+                "value": 0.7,
+                "display_name": "Temperature"
+              },
+              "max_tokens": {
+                "type": "int",
+                "value": 1000,
+                "display_name": "Max Tokens"
+              }
+            }
+          }
+        }
+      },
+      {
+        "id": "chat_output",
+        "type": "ChatOutput",
+        "position": { "x": 700, "y": 100 },
+        "data": {
+          "node": {
+            "template": {
+              "input_value": {
+                "type": "str",
+                "value": "",
+                "display_name": "Response"
+              }
+            }
+          }
+        }
+      }
+    ],
+    "edges": [
+      {
+        "id": "edge_1",
+        "source": "chat_input",
+        "target": "openai_llm",
+        "sourceHandle": "output",
+        "targetHandle": "input"
+      },
+      {
+        "id": "edge_2", 
+        "source": "openai_llm",
+        "target": "chat_output",
+        "sourceHandle": "output",
+        "targetHandle": "input"
+      }
+    ]
+  },
+  "is_component": false
+}

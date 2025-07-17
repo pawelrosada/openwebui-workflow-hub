@@ -1,77 +1,95 @@
 # Copilot Instructions for Langflow-based Applications
 
-## 📋 Spis treści
+## 📋 Table of Contents
 
-1. [Ogólne wytyczne](#ogólne-wytyczne)
-2. [Stack technologiczny](#stack-technologiczny)
-3. [Wzorce architektoniczne](#wzorce-architektoniczne)
-4. [Integracja z Langflow](#integracja-z-langflow)
-5. [Standardy kodu](#standardy-kodu)
-6. [Konfiguracja Docker](#konfiguracja-docker)
-7. [Skrypty deweloperskie](#skrypty-deweloperskie)
-8. [Bezpieczeństwo i wydajność](#bezpieczeństwo-i-wydajność)
-9. [Standardy testowania](#standardy-testowania)
-10. [Zasady generowania kodu](#zasady-generowania-kodu)
-
----
-
-## 🎯 Ogólne wytyczne
-
-### Podstawowe zasady
-- **Zawsze używaj TypeScript** z włączonym trybem strict
-- **Implementuj właściwą obsługę błędów** z niestandardowymi klasami błędów
-- **Konteneryzuj wszystkie komponenty** za pomocą Docker
-- **Pisz testy** dla każdej funkcjonalności
-- **Dokumentuj kod** i API
+1. [General Guidelines](#general-guidelines)
+2. [Technology Stack](#technology-stack)
+3. [Architectural Patterns](#architectural-patterns)
+4. [Langflow Integration](#langflow-integration)
+5. [Code Standards](#code-standards)
+6. [Docker Configuration](#docker-configuration)
+7. [Development Scripts](#development-scripts)
+8. [Security and Performance](#security-and-performance)
+9. [Testing Standards](#testing-standards)
+10. [Code Generation Rules](#code-generation-rules)
 
 ---
 
-## 🛠 Stack technologiczny
+## 🎯 General Guidelines
+
+### Communication Language
+- **Always respond in Polish** when interacting with users
+- **Code comments and documentation** should be in Polish
+- **Variable names and functions** can be in English (standard practice)
+- **Error messages** should be in Polish for better user experience
+
+### Basic Principles
+- **Always use TypeScript** with strict mode enabled
+- **Implement proper error handling** with custom error classes
+- **Containerize all components** using Docker
+- **Write tests** for every functionality
+- **Document code** and APIs in Polish
+
+---
+
+## 🛠 Technology Stack
 
 ### Backend (2025 Standards)
-| Komponent | Technologia | Wersja |
+| Component | Technology | Version |
 |-----------|-------------|--------|
 | **Runtime** | Node.js LTS | 22+ |
-| **Język** | TypeScript | 5.3+ |
+| **Language** | TypeScript | 5.3+ |
 | **Framework** | Fastify / Express | 4.26+ / 5+ |
-| **Baza danych** | PostgreSQL | 16+ |
+| **Database** | PostgreSQL | 16+ |
 | **ORM** | Prisma / Drizzle | 5.9+ |
-| **Walidacja** | Zod | 3.22+ |
-| **Autentykacja** | Lucia Auth / Auth.js | NextAuth v5 |
+| **Validation** | Zod | 3.22+ |
+| **Authentication** | Lucia Auth / Auth.js | NextAuth v5 |
 | **Cache** | Redis | 7.2+ |
 | **Queue** | BullMQ | 5+ |
 | **Testing** | Vitest | 1.2+ |
 | **Build** | Vite / esbuild | 5+ |
 | **Package Manager** | pnpm | 8.15+ |
 
----
+### Frontend (MANDATORY)
+| Component | Technology | Version |
+|-----------|-------------|--------|
+| **Framework** | **Open WebUI** | Latest |
+| **Base** | Svelte/SvelteKit | Latest supported |
+| **Styling** | Tailwind CSS | As per Open WebUI |
+| **Components** | Open WebUI Components | Latest |
+| **State Management** | Svelte stores | As per Open WebUI |
 
-## 🏗 Wzorce architektoniczne
-
-### Rekomendowane wzorce
-- **Clean Architecture** - separacja warstw biznesowych
-- **Hexagonal Architecture** - lepsze testowanie
-- **Repository Pattern** - abstrakcja dostępu do danych
-- **CQRS** - separacja odczytu i zapisu
-- **Event-Driven Architecture** - asynchroniczna komunikacja
-- **Modular Monolith** - struktura modularna
-
----
-
-## 🔗 Integracja z Langflow
-
-### Główne punkty integracji
-- **REST API** - komunikacja z backendem Python
-- **WebSocket** - aktualizacje w czasie rzeczywistym
-- **Webhooks** - obsługa callbacków
-- **Mikrousługi** - komplementarne serwisy Node.js
-- **Custom Components** - rozszerzenia przez Node.js
+**⚠️ IMPORTANT: All frontend development MUST use Open WebUI framework (https://github.com/open-webui/open-webui)**
 
 ---
 
-## 💻 Standardy kodu
+## 🏗 Architectural Patterns
 
-### TypeScript - podstawowy szablon
+### Recommended Patterns
+- **Clean Architecture** - business layer separation
+- **Hexagonal Architecture** - better testing
+- **Repository Pattern** - data access abstraction
+- **CQRS** - read/write separation
+- **Event-Driven Architecture** - asynchronous communication
+- **Modular Monolith** - modular structure
+
+---
+
+## 🔗 Langflow Integration
+
+### Main Integration Points
+- **REST API** - communication with Python backend
+- **WebSocket** - real-time updates
+- **Webhooks** - callback handling
+- **Microservices** - complementary Node.js services
+- **Custom Components** - extensions through Node.js
+- **Open WebUI Integration** - chat interface for Langflow flows
+
+---
+
+## 💻 Code Standards
+
+### TypeScript - Basic Template
 
 ```typescript
 // Używaj strict TypeScript configuration
@@ -90,7 +108,7 @@ const FlowRequestSchema = z.object({
 
 type FlowRequest = z.infer<typeof FlowRequestSchema>;
 
-// Właściwa obsługa błędów
+// Właściwa obsługa błędów z polskimi komunikatami
 class FlowExecutionError extends Error {
   constructor(
     message: string,
@@ -103,7 +121,39 @@ class FlowExecutionError extends Error {
 }
 ```
 
-### Operacje bazodanowe z Prisma
+### Open WebUI Frontend Integration
+
+```typescript
+// src/lib/stores/langflow.ts
+import { writable } from 'svelte/store';
+import type { Writable } from 'svelte/store';
+
+interface LangflowState {
+  flows: Flow[];
+  activeFlow: Flow | null;
+  isExecuting: boolean;
+}
+
+export const langflowStore: Writable<LangflowState> = writable({
+  flows: [],
+  activeFlow: null,
+  isExecuting: false
+});
+
+// Integracja z Open WebUI chat
+export const executeLangflowInChat = async (flowId: string, message: string) => {
+  // Implementacja wykonania flow w kontekście chatu Open WebUI
+  const response = await fetch('/api/langflow/execute', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ flowId, message })
+  });
+  
+  return response.json();
+};
+```
+
+### Database Operations with Prisma
 
 ```typescript
 import { PrismaClient } from '@prisma/client';
@@ -119,47 +169,39 @@ class FlowRepository {
         include: { user: true, components: true }
       });
     } catch (error) {
-      throw new DatabaseError('Failed to create flow', error);
+      throw new DatabaseError('Nie udało się utworzyć przepływu', error);
     }
   }
 }
 ```
 
-### API Design z Fastify
-
-```typescript
-import fastify from 'fastify';
-import { flowRoutes } from './routes/flows.js';
-
-const app = fastify({
-  logger: {
-    level: process.env.LOG_LEVEL || 'info',
-    transport: {
-      target: 'pino-pretty'
-    }
-  }
-});
-
-// Rejestracja pluginów
-await app.register(import('@fastify/helmet'));
-await app.register(import('@fastify/cors'));
-await app.register(import('@fastify/rate-limit'));
-await app.register(flowRoutes, { prefix: '/api/v1' });
-```
-
 ---
 
-## 🐳 Konfiguracja Docker
+## 🐳 Docker Configuration
 
-### Docker Compose - pełna konfiguracja
+### Docker Compose - Full Configuration
 
 ```yaml
 version: '3.8'
 
 services:
+  open-webui:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    environment:
+      - WEBUI_SECRET_KEY=${WEBUI_SECRET_KEY}
+      - LANGFLOW_API_URL=http://langflow-node-api:3000
+    depends_on:
+      - langflow-node-api
+    ports:
+      - "8080:8080"
+    volumes:
+      - open_webui_data:/app/backend/data
+
   langflow-node-api:
     build:
-      context: .
+      context: ./backend
       dockerfile: Dockerfile
       target: production
     environment:
@@ -214,6 +256,7 @@ services:
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf
     depends_on:
+      - open-webui
       - langflow-node-api
       - langflow-python
 
@@ -221,12 +264,13 @@ volumes:
   postgres_data:
   redis_data:
   langflow_data:
+  open_webui_data:
 ```
 
-### Multi-stage Dockerfile
+### Multi-stage Dockerfile for Backend
 
 ```dockerfile
-# Dockerfile
+# backend/Dockerfile
 FROM node:22-alpine AS base
 RUN corepack enable pnpm
 
@@ -253,17 +297,40 @@ EXPOSE 3000
 CMD ["node", "dist/index.js"]
 ```
 
+### Dockerfile for Open WebUI Frontend
+
+```dockerfile
+# frontend/Dockerfile
+FROM ghcr.io/open-webui/open-webui:main
+
+# Kopiuj niestandardowe komponenty i konfigurację
+COPY ./src/lib/components /app/src/lib/components
+COPY ./src/routes /app/src/routes
+COPY ./src/lib/stores /app/src/lib/stores
+
+# Zainstaluj dodatkowe zależności jeśli potrzebne
+COPY package.json ./
+RUN npm install
+
+# Zbuduj aplikację
+RUN npm run build
+
+EXPOSE 8080
+```
+
 ---
 
-## 🚀 Skrypty deweloperskie
+## 🚀 Development Scripts
 
-### Package.json - standardowe skrypty
+### Package.json - Standard Scripts
 
 ```json
 {
   "scripts": {
     "dev": "tsx watch src/index.ts",
+    "dev:frontend": "cd frontend && npm run dev",
     "build": "tsc && tsc-alias",
+    "build:frontend": "cd frontend && npm run build",
     "start": "node dist/index.js",
     "test": "vitest",
     "test:coverage": "vitest --coverage",
@@ -276,93 +343,59 @@ CMD ["node", "dist/index.js"]
 }
 ```
 
-### Skrypt deweloperski (dev.sh)
+### Development Script (dev.sh)
 
 ```bash
 #!/bin/bash
 # scripts/dev.sh
 
-echo "🚀 Starting Langflow Node.js development environment..."
+echo "🚀 Uruchamianie środowiska deweloperskiego Langflow + Open WebUI..."
 
 # Sprawdź czy Docker działa
 if ! docker info > /dev/null 2>&1; then
-    echo "❌ Docker is not running. Please start Docker first."
+    echo "❌ Docker nie działa. Uruchom Docker najpierw."
     exit 1
 fi
 
 # Utwórz .env jeśli nie istnieje
 if [ ! -f .env ]; then
-    echo "📝 Creating .env file from template..."
+    echo "📝 Tworzenie pliku .env z szablonu..."
     cp .env.example .env
 fi
 
 # Zbuduj i uruchom serwisy
-echo "🏗️  Building and starting services..."
+echo "🏗️  Budowanie i uruchamianie serwisów..."
 docker-compose -f docker-compose.dev.yml up --build -d
 
 # Poczekaj na bazę danych
-echo "⏳ Waiting for database to be ready..."
+echo "⏳ Oczekiwanie na gotowość bazy danych..."
 until docker-compose -f docker-compose.dev.yml exec db pg_isready -U user -d langflow_node; do
     sleep 2
 done
 
 # Uruchom migracje
-echo "🗄️  Running database migrations..."
+echo "🗄️  Uruchamianie migracji bazy danych..."
 pnpm db:migrate
 
 # Zainstaluj zależności jeśli potrzebne
 if [ ! -d "node_modules" ]; then
-    echo "📦 Installing dependencies..."
+    echo "📦 Instalowanie zależności..."
     pnpm install
 fi
 
-echo "✅ Development environment is ready!"
-echo "🌐 Node.js API: http://localhost:3000"
+echo "✅ Środowisko deweloperskie jest gotowe!"
+echo "🌐 Open WebUI: http://localhost:8080"
+echo "🔧 Node.js API: http://localhost:3000"
 echo "🔧 Langflow UI: http://localhost:7860"
 echo "📊 Database Studio: pnpm db:studio"
-echo "📝 API Documentation: http://localhost:3000/docs"
-```
-
-### Skrypt produkcyjny (prod.sh)
-
-```bash
-#!/bin/bash
-# scripts/prod.sh
-
-echo "🚀 Deploying to production..."
-
-# Zbuduj obrazy produkcyjne
-docker-compose build --no-cache
-
-# Uruchom serwisy
-docker-compose up -d
-
-# Sprawdź zdrowie aplikacji
-echo "🏥 Running health checks..."
-sleep 10
-
-if curl -f http://localhost:3000/health; then
-    echo "✅ Node.js API is healthy"
-else
-    echo "❌ Node.js API health check failed"
-    exit 1
-fi
-
-if curl -f http://localhost:7860/health; then
-    echo "✅ Langflow is healthy"
-else
-    echo "❌ Langflow health check failed"
-    exit 1
-fi
-
-echo "🎉 Production deployment successful!"
+echo "📝 Dokumentacja API: http://localhost:3000/docs"
 ```
 
 ---
 
-## 🔒 Bezpieczeństwo i wydajność
+## 🔒 Security and Performance
 
-### Konfiguracja bezpieczeństwa
+### Security Configuration
 
 ```typescript
 import helmet from '@fastify/helmet';
@@ -381,11 +414,12 @@ await app.register(helmet, {
 
 await app.register(rateLimit, {
   max: 100,
-  timeWindow: '1 minute'
+  timeWindow: '1 minute',
+  message: 'Zbyt wiele żądań, spróbuj ponownie później'
 });
 ```
 
-### Optymalizacja wydajności - Redis caching
+### Performance Optimization - Redis Caching
 
 ```typescript
 import Redis from 'ioredis';
@@ -406,9 +440,9 @@ class CacheService {
 
 ---
 
-## 🧪 Standardy testowania
+## 🧪 Testing Standards
 
-### Konfiguracja Vitest
+### Vitest Configuration
 
 ```typescript
 // vitest.config.ts
@@ -426,7 +460,7 @@ export default defineConfig({
 });
 ```
 
-### Przykłady testów
+### Test Examples
 
 ```typescript
 // tests/flows.test.ts
@@ -441,20 +475,20 @@ describe('Flow API', () => {
     await app.ready();
   });
 
-  it('should create a new flow', async () => {
+  it('powinien utworzyć nowy przepływ', async () => {
     const response = await app.inject({
       method: 'POST',
       url: '/api/v1/flows',
       payload: {
         name: 'Test Flow',
-        description: 'A test flow'
+        description: 'Testowy przepływ'
       }
     });
 
     expect(response.statusCode).toBe(201);
     expect(response.json()).toMatchObject({
       name: 'Test Flow',
-      description: 'A test flow'
+      description: 'Testowy przepływ'
     });
   });
 });
@@ -462,29 +496,41 @@ describe('Flow API', () => {
 
 ---
 
-## ⚙️ Zasady generowania kodu
+## ⚙️ Code Generation Rules
 
-### ✅ Obowiązkowe standardy
+### ✅ Mandatory Standards
 
-1. **TypeScript strict mode** - zawsze włączony
-2. **Obsługa błędów** - niestandardowe klasy błędów
-3. **Walidacja Zod** - dla wszystkich inputów
-4. **Testy Vitest** - comprehensive coverage
-5. **Docker** - aktualizacja docker-compose.yml
-6. **Skrypty** - tworzenie/aktualizacja run scripts
-7. **Logging** - structured format
-8. **Dependency Injection** - lepsza testowalność
-9. **Migracje DB** - Prisma migrations
-10. **Monitoring** - health checks
-11. **Redis caching** - dla wydajności
-12. **Security** - rate limiting i security headers
+1. **TypeScript strict mode** - always enabled
+2. **Error handling** - custom error classes with Polish messages
+3. **Zod validation** - for all inputs with Polish error messages
+4. **Vitest tests** - comprehensive coverage with Polish descriptions
+5. **Docker** - update docker-compose.yml for all new services
+6. **Scripts** - create/update run scripts with Polish comments
+7. **Logging** - structured format with Polish messages
+8. **Dependency Injection** - better testability
+9. **DB Migrations** - Prisma migrations
+10. **Monitoring** - health checks with Polish status messages
+11. **Redis caching** - for performance optimization
+12. **Security** - rate limiting and security headers
+13. **Open WebUI Frontend** - MANDATORY for all frontend development
+14. **Polish Communication** - all user-facing messages in Polish
 
-### 🎯 Cel końcowy
+### 🎯 End Goal
 
-Każda zmiana kodu powinna być:
-- **Skonteneryzowana** - gotowa do Docker
-- **Przetestowana** - z pełnym pokryciem
-- **Gotowa do produkcji** - z właściwą integracją z Langflow Python backend
+Every code change should be:
+- **Containerized** - ready for Docker deployment
+- **Tested** - with full coverage and Polish test descriptions
+- **Production-ready** - with proper integration to Langflow Python backend
+- **Open WebUI Compatible** - frontend must use Open WebUI framework
+- **Polish User Experience** - all interactions in Polish language
+
+### 🚨 Critical Requirements
+
+- **NEVER create custom frontend frameworks** - always use Open WebUI
+- **ALWAYS respond to users in Polish** during conversations
+- **ALWAYS include Polish comments** in generated code
+- **ALWAYS update docker-compose.yml** when adding new services
+- **ALWAYS create corresponding tests** for new functionality
 
 ---
 
