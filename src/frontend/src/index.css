@@ -1,0 +1,195 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Light theme */
+  --background: 255 255 255;
+  --foreground: 15 23 42;
+  --card: 248 250 252;
+  --card-foreground: 15 23 42;
+  --popover: 255 255 255;
+  --popover-foreground: 15 23 42;
+  --primary: 59 130 246;
+  --primary-foreground: 255 255 255;
+  --secondary: 241 245 249;
+  --secondary-foreground: 51 65 85;
+  --muted: 241 245 249;
+  --muted-foreground: 100 116 139;
+  --accent: 241 245 249;
+  --accent-foreground: 15 23 42;
+  --destructive: 239 68 68;
+  --destructive-foreground: 255 255 255;
+  --border: 226 232 240;
+  --input: 255 255 255;
+  --ring: 59 130 246;
+  --radius: 8px;
+}
+
+.dark {
+  /* Dark theme */
+  --background: 9 9 11;
+  --foreground: 248 250 252;
+  --card: 24 24 27;
+  --card-foreground: 248 250 252;
+  --popover: 24 24 27;
+  --popover-foreground: 248 250 252;
+  --primary: 99 102 241;
+  --primary-foreground: 248 250 252;
+  --secondary: 39 39 42;
+  --secondary-foreground: 161 161 170;
+  --muted: 39 39 42;
+  --muted-foreground: 161 161 170;
+  --accent: 39 39 42;
+  --accent-foreground: 248 250 252;
+  --destructive: 239 68 68;
+  --destructive-foreground: 248 250 252;
+  --border: 39 39 42;
+  --input: 39 39 42;
+  --ring: 99 102 241;
+}
+
+* {
+  border-color: hsl(var(--border));
+}
+
+html {
+  font-family: 'Inter', sans-serif;
+}
+
+body {
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-feature-settings: 'rlig' 1, 'calt' 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  margin: 0;
+  padding: 0;
+}
+
+/* Button Styles */
+.btn-primary {
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 500;
+  transition: all 0.2s;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-primary:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  background: hsl(var(--secondary));
+  color: hsl(var(--secondary-foreground));
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 500;
+  transition: all 0.2s;
+  border: 1px solid hsl(var(--border));
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-secondary:hover {
+  background: hsl(var(--accent));
+}
+
+/* Input Styles */
+.input-field {
+  background: hsl(var(--input));
+  border: 1px solid hsl(var(--border));
+  border-radius: 8px;
+  padding: 12px 16px;
+  transition: all 0.2s;
+  width: 100%;
+  color: hsl(var(--foreground));
+}
+
+.input-field:focus {
+  outline: none;
+  border-color: hsl(var(--primary));
+  box-shadow: 0 0 0 3px hsl(var(--ring) / 0.1);
+}
+
+.input-field::placeholder {
+  color: hsl(var(--muted-foreground));
+}
+
+/* Card Styles */
+.card {
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  border-radius: 12px;
+  padding: 24px;
+  color: hsl(var(--card-foreground));
+}
+
+/* Message Styles */
+.message-user {
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  border-radius: 18px 18px 4px 18px;
+  padding: 12px 16px;
+  max-width: 80%;
+  margin-left: auto;
+  margin-bottom: 16px;
+}
+
+.message-assistant {
+  background: hsl(var(--card));
+  color: hsl(var(--card-foreground));
+  border: 1px solid hsl(var(--border));
+  border-radius: 18px 18px 18px 4px;
+  padding: 12px 16px;
+  max-width: 80%;
+  margin-right: auto;
+  margin-bottom: 16px;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: hsl(var(--secondary));
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted-foreground) / 0.3);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground) / 0.5);
+}
