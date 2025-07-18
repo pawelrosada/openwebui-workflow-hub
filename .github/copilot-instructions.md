@@ -12,6 +12,7 @@
 8. [Security and Performance](#security-and-performance)
 9. [Testing Standards](#testing-standards)
 10. [Code Generation Rules](#code-generation-rules)
+*11. [CI/CD Pipelines](#ci-cd-pipelines)*  // Nowa sekcja dodana dla pipelines
 
 ---
 
@@ -26,9 +27,10 @@
 ### Basic Principles
 - **Always use TypeScript** with strict mode enabled
 - **Implement proper error handling** with custom error classes
-- **Containerize all components** using Docker
+- **Containerize all components** using Docker *i Docker Compose do orkiestracji wieloserwisowych środowisk*
 - **Write tests** for every functionality
 - **Document code** and APIs in Polish
+* - **Buduj całość aplikacji z użyciem Open WebUI jako obowiązkowego frameworka frontendowego, integrując go z Docker i pipelines dla automatyzacji deploymentu***
 
 ---
 
@@ -49,6 +51,7 @@
 | **Testing** | Vitest | 1.2+ |
 | **Build** | Vite / esbuild | 5+ |
 | **Package Manager** | pnpm | 8.15+ |
+* | **Konteneryzacja** | Docker & Docker Compose | Latest (z multi-stage builds) |*
 
 ### Frontend (MANDATORY)
 | Component | Technology | Version |
@@ -59,7 +62,7 @@
 | **Components** | Open WebUI Components | Latest |
 | **State Management** | Svelte stores | As per Open WebUI |
 
-**⚠️ IMPORTANT: All frontend development MUST use Open WebUI framework (https://github.com/open-webui/open-webui)**
+**⚠️ IMPORTANT: All frontend development MUST use Open WebUI framework (https://github.com/open-webui/open-webui)** *– integruj z Docker do budowania obrazów i pipelines do automatycznego deploymentu, zapewniając kompatybilność z Langflow dla AI flows.*
 
 ---
 
@@ -84,6 +87,7 @@
 - **Microservices** - complementary Node.js services
 - **Custom Components** - extensions through Node.js
 - **Open WebUI Integration** - chat interface for Langflow flows
+* - **Docker Integration** - uruchamiaj Langflow w kontenerach Docker z Docker Compose dla łatwej skalowalności*
 
 ---
 
@@ -180,6 +184,7 @@ class FlowRepository {
 ## 🐳 Docker Configuration
 
 ### Docker Compose - Full Configuration
+*// Zaktualizowano, aby podkreślić użycie Docker Compose jako głównego narzędzia do budowy i orkiestracji całej aplikacji, integrując Open WebUI z Langflow.*
 
 ```yaml
 version: '3.8'
@@ -391,6 +396,8 @@ echo "📊 Database Studio: pnpm db:studio"
 echo "📝 Dokumentacja API: http://localhost:3000/docs"
 ```
 
+*// Dodano komentarz: Używaj tego skryptu w połączeniu z pipelines CI/CD do automatyzacji budowy w Docker.*
+
 ---
 
 ## 🔒 Security and Performance
@@ -534,4 +541,62 @@ Every code change should be:
 
 ---
 
-*Ostatnia aktualizacja: 17 lipca 2025*
+*// Nowa sekcja:*
+
+## 🔄 CI/CD Pipelines
+
+### Recommended Setup
+*Używaj pipelines CI/CD (np. GitHub Actions, GitLab CI lub Jenkins) do automatyzacji budowy całej aplikacji. Integruj z Docker i Docker Compose do tworzenia obrazów, testowania i deploymentu. Open WebUI musi być budowane jako część pipeline, z automatyczną integracją z Langflow dla AI flows. Przykładowy workflow:*
+
+- **Triggers**: Na push do main lub pull requests.
+- **Steps**:
+  1. **Checkout code** i instalacja zależności (pnpm install).
+  2. **Uruchom testy** (pnpm test) z coverage.
+  3. **Buduj Docker images** za pomocą Dockerfile (docker build).
+  4. **Orkiestruj z Docker Compose** (docker-compose up -d --build) do lokalnego testowania.
+  5. **Deploy** do chmury (np. AWS, GCP) z push'em obrazów do registry.
+  6. **Monitoruj** z użyciem narzędzi jak Prometheus, integrując z security checks.
+
+### Example GitHub Actions Workflow (pipelines.yml)
+
+```yaml
+name: CI/CD Pipeline for Langflow + Open WebUI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Run tests
+        run: pnpm test:coverage
+
+      - name: Build Docker images
+        run: docker build -t myapp-backend ./backend
+
+      - name: Run Docker Compose
+        run: docker-compose -f docker-compose.yml up -d --build
+
+      - name: Deploy to production
+        if: github.ref == 'refs/heads/main'
+        run: |
+          # Przykładowy deploy, np. do AWS ECR [[10]]
+          aws ecr get-login-password --region region | docker login --username AWS --password-stdin account.dkr.ecr.region.amazonaws.com
+          docker push account.dkr.ecr.region.amazonaws.com/myapp:latest
+```
+
+*To zapewnia automatyczną budowę całości, z fokusem na Docker, Open WebUI i Langflow dla repozytoriów AI.*
+
+---
+
+*Ostatnia aktualizacja: 18 lipca 2025*
