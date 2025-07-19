@@ -22,11 +22,19 @@ securityContext: {}
 service:
   type: ClusterIP
   port: 7860
+  annotations: {}
+    # For GCP Load Balancer (uncomment if needed):
+    # cloud.google.com/neg: '{"ingress": true}'
+    # service.beta.kubernetes.io/do-loadbalancer-enable-proxy-protocol: "true"
 
 ingress:
   enabled: false
   className: ""
   annotations: {}
+    # For GCP Load Balancer (uncomment if needed):
+    # kubernetes.io/ingress.class: "gce"
+    # kubernetes.io/ingress.global-static-ip-name: "your-ip-name"
+    # ingress.gcp.kubernetes.io/load-balancer-type: "External"
   hosts:
     - host: langflow.local
       paths:
@@ -36,10 +44,8 @@ ingress:
 
 resources:
   limits:
-    cpu: 500m
     memory: 1Gi
   requests:
-    cpu: 250m
     memory: 512Mi
 
 autoscaling:
@@ -54,28 +60,24 @@ tolerations: []
 
 affinity: {}
 
-# PostgreSQL configuration
+# Official PostgreSQL chart configuration (Bitnami)
 postgresql:
-  enabled: true  # Deploy dedicated PostgreSQL
-  image:
-    repository: postgres
-    tag: "16"
-    pullPolicy: IfNotPresent
+  enabled: true  # Deploy official PostgreSQL chart
   auth:
-    database: langflow_db  # Dedicated per tool
+    database: langflow_db  # Dedicated database for LangFlow
     username: langflow_user
     password: changeme  # Use secrets in production
-  persistence:
-    enabled: true
-    size: 8Gi  # Scalable storage
-    storageClass: ""
-  resources:
-    requests:
-      memory: 256Mi
-      cpu: 250m
-    limits:
-      memory: 512Mi
-      cpu: 500m
+    postgresPassword: postgres_admin_password  # Admin password
+  primary:
+    persistence:
+      enabled: true
+      size: 8Gi  # Scalable storage
+      storageClass: ""  # Use default storage class (works with GKE)
+    resources:
+      requests:
+        memory: 256Mi
+      limits:
+        memory: 512Mi
 
 # MCP Servers configuration - Easy to add multiple servers for different apps
 mcpServers:
@@ -93,10 +95,8 @@ mcpServers:
     resources:
       requests:
         memory: 256Mi
-        cpu: 250m
       limits:
         memory: 512Mi
-        cpu: 500m
     env:
       - name: GITHUB_PERSONAL_ACCESS_TOKEN
         value: ""  # Set your token here
@@ -115,10 +115,8 @@ mcpServers:
     resources:
       requests:
         memory: 128Mi
-        cpu: 100m
       limits:
         memory: 256Mi
-        cpu: 250m
     env: []
 
   # Example MCP server for web scraping
@@ -135,10 +133,8 @@ mcpServers:
     resources:
       requests:
         memory: 256Mi
-        cpu: 250m
       limits:
         memory: 512Mi
-        cpu: 500m
     env:
       - name: BRAVE_API_KEY
         value: ""  # Set your API key here
@@ -156,10 +152,8 @@ openwebui:
   resources:
     requests:
       memory: 256Mi
-      cpu: 250m
     limits:
       memory: 512Mi
-      cpu: 500m
 
 # For dynamic configs in Azure/K8s with Helm
 extraEnv: []

@@ -20,8 +20,8 @@ spec:
     spec:
       containers:
         - name: postgresql
-          image: "{{ .Values.postgresql.image.repository }}:{{ .Values.postgresql.image.tag }}"
-          imagePullPolicy: {{ .Values.postgresql.image.pullPolicy }}
+          image: "postgres:16"
+          imagePullPolicy: IfNotPresent
           ports:
             - name: postgresql
               containerPort: 5432
@@ -58,13 +58,13 @@ spec:
             successThreshold: 1
             failureThreshold: 6
           resources:
-            {{- toYaml .Values.postgresql.resources | nindent 12 }}
+            {{- toYaml .Values.postgresql.primary.resources | nindent 12 }}
           volumeMounts:
             - name: postgresql-data
               mountPath: /var/lib/postgresql/data
       volumes:
         - name: postgresql-data
-          {{- if .Values.postgresql.persistence.enabled }}
+          {{- if .Values.postgresql.primary.persistence.enabled }}
           persistentVolumeClaim:
             claimName: {{ include "langflow-app.fullname" . }}-postgresql
           {{- else }}
@@ -88,7 +88,7 @@ spec:
   selector:
     {{- include "langflow-app.selectorLabels" . | nindent 4 }}
     app.kubernetes.io/component: database
-{{- if .Values.postgresql.persistence.enabled }}
+{{- if .Values.postgresql.primary.persistence.enabled }}
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -102,9 +102,9 @@ spec:
     - ReadWriteOnce
   resources:
     requests:
-      storage: {{ .Values.postgresql.persistence.size }}
-  {{- if .Values.postgresql.persistence.storageClass }}
-  storageClassName: {{ .Values.postgresql.persistence.storageClass }}
+      storage: {{ .Values.postgresql.primary.persistence.size }}
+  {{- if .Values.postgresql.primary.persistence.storageClass }}
+  storageClassName: {{ .Values.postgresql.primary.persistence.storageClass }}
   {{- end }}
 {{- end }}
 {{- end }}

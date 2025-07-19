@@ -1,7 +1,7 @@
 apiVersion: v2
 name: langflow-app
-description: Helm chart for deploying LangFlow app with dedicated PostgreSQL and MCP scaling.
-version: 0.1.0
+description: Helm chart for LangFlow with PostgreSQL, no CPU limits, GKE-ready.
+version: 0.2.0
 appVersion: "latest"
 keywords:
   - langflow
@@ -9,6 +9,8 @@ keywords:
   - workflow
   - postgresql
   - mcp
+  - gke
+  - gcp
 home: https://github.com/pawelrosada/langflow-ui
 maintainers:
   - name: pawelrosada

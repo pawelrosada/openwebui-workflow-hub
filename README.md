@@ -76,6 +76,29 @@ helm upgrade my-langflow ./helm --set mcpServers.github-mcp.replicas=3
 helm upgrade my-langflow ./helm --set mcpServers.filesystem-mcp.enabled=false
 ```
 
+### GKE and GCP Load Balancer Setup
+
+For production deployment on Google Kubernetes Engine:
+
+```bash
+# Deploy with external load balancer
+helm install my-langflow ./helm \
+  --set service.type=NodePort \
+  --set ingress.enabled=true \
+  --set ingress.annotations."kubernetes\.io/ingress\.class"=gce
+
+# With custom annotations for GCP
+helm install my-langflow ./helm \
+  --set service.annotations."cloud\.google\.com/neg"='{"ingress": true}'
+```
+
+### Production Best Practices
+
+✅ **No CPU limits** - Follows Kubernetes best practices for better performance
+✅ **Memory limits only** - Prevents OOM while allowing CPU bursting  
+✅ **GKE optimized** - Compatible with Google Kubernetes Engine
+✅ **Official chart pattern** - Uses community standards for PostgreSQL
+
 ### Docker Compose (Alternative)
 
 For local development, use the provided Docker Compose setup:

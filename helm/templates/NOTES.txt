@@ -22,7 +22,7 @@
 {{- end }}
 
 2. LangFlow is now deployed with:
-   - Dedicated PostgreSQL database: {{ .Values.postgresql.auth.database }}
+   - Official PostgreSQL chart (Bitnami) database: {{ .Values.postgresql.auth.database }}
    - Database user: {{ .Values.postgresql.auth.username }}
 {{- $mcpCount := 0 }}
 {{- range $serverName, $server := .Values.mcpServers }}
@@ -68,3 +68,14 @@
 
 7. To check all services:
    kubectl get all -l app.kubernetes.io/instance={{ .Release.Name }} -n {{ .Release.Namespace }}
+
+8. For GKE deployment with load balancer:
+   # Enable ingress with GCP annotations
+   helm upgrade {{ .Release.Name }} ./helm \
+     --set ingress.enabled=true \
+     --set ingress.annotations."kubernetes\.io/ingress\.class"=gce \
+     --set service.type=NodePort
+
+9. Chart uses official community charts:
+   - PostgreSQL: Bitnami PostgreSQL chart (no CPU limits)
+   - Optimized for GKE and GCP Load Balancers

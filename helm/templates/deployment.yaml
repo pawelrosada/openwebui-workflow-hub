@@ -50,8 +50,10 @@ spec:
             initialDelaySeconds: 15
             periodSeconds: 10
           env:
+            {{- if .Values.postgresql.enabled }}
             - name: LANGFLOW_DATABASE_URL
               value: "postgresql://{{ .Values.postgresql.auth.username }}:{{ .Values.postgresql.auth.password }}@{{ include "langflow-app.fullname" . }}-postgresql:5432/{{ .Values.postgresql.auth.database }}"
+            {{- end }}
             - name: LANGFLOW_CONFIG_DIR
               value: {{ .Values.config.langflowConfigDir }}
             - name: LANGFLOW_AUTO_LOGIN
