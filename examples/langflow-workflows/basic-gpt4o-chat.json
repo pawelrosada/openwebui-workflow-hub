@@ -1,0 +1,225 @@
+{
+  "data": {
+    "nodes": [
+      {
+        "id": "ChatInput-1",
+        "type": "ChatInput",
+        "position": {
+          "x": 100,
+          "y": 200
+        },
+        "data": {
+          "type": "ChatInput",
+          "node": {
+            "template": {
+              "input_value": {
+                "dynamic": true,
+                "required": true,
+                "placeholder": "",
+                "show": true,
+                "multiline": true,
+                "value": "",
+                "password": false,
+                "name": "input_value",
+                "display_name": "Chat Input",
+                "type": "str",
+                "info": "",
+                "list": false
+              }
+            },
+            "description": "A chat input component for user messages.",
+            "base_classes": [
+              "Message"
+            ],
+            "display_name": "Chat Input",
+            "documentation": "",
+            "custom_fields": {},
+            "output_types": [
+              "Message"
+            ]
+          }
+        }
+      },
+      {
+        "id": "OpenAI-1",
+        "type": "OpenAI",
+        "position": {
+          "x": 400,
+          "y": 200
+        },
+        "data": {
+          "type": "OpenAI",
+          "node": {
+            "template": {
+              "openai_api_key": {
+                "required": true,
+                "placeholder": "",
+                "show": true,
+                "multiline": false,
+                "value": "",
+                "password": true,
+                "name": "openai_api_key",
+                "display_name": "OpenAI API Key",
+                "type": "str",
+                "info": "Enter your OpenAI API key here",
+                "list": false
+              },
+              "model": {
+                "required": true,
+                "placeholder": "",
+                "show": true,
+                "multiline": false,
+                "value": "gpt-4o",
+                "password": false,
+                "name": "model",
+                "display_name": "Model",
+                "type": "str",
+                "info": "OpenAI model to use",
+                "list": false,
+                "options": [
+                  "gpt-4o",
+                  "gpt-4o-mini",
+                  "gpt-4-turbo",
+                  "gpt-3.5-turbo"
+                ]
+              },
+              "temperature": {
+                "required": false,
+                "placeholder": "",
+                "show": true,
+                "multiline": false,
+                "value": 0.7,
+                "password": false,
+                "name": "temperature",
+                "display_name": "Temperature",
+                "type": "float",
+                "info": "Controls randomness in responses",
+                "list": false
+              },
+              "max_tokens": {
+                "required": false,
+                "placeholder": "",
+                "show": true,
+                "multiline": false,
+                "value": 1000,
+                "password": false,
+                "name": "max_tokens",
+                "display_name": "Max Tokens",
+                "type": "int",
+                "info": "Maximum number of tokens to generate",
+                "list": false
+              },
+              "input_value": {
+                "dynamic": true,
+                "required": true,
+                "placeholder": "",
+                "show": true,
+                "multiline": true,
+                "value": "",
+                "password": false,
+                "name": "input_value",
+                "display_name": "Input",
+                "type": "str",
+                "info": "",
+                "list": false
+              }
+            },
+            "description": "OpenAI LLM component using GPT models.",
+            "base_classes": [
+              "BaseLanguageModel",
+              "LanguageModel"
+            ],
+            "display_name": "OpenAI",
+            "documentation": "",
+            "custom_fields": {},
+            "output_types": [
+              "Message"
+            ]
+          }
+        }
+      },
+      {
+        "id": "ChatOutput-1",
+        "type": "ChatOutput",
+        "position": {
+          "x": 700,
+          "y": 200
+        },
+        "data": {
+          "type": "ChatOutput",
+          "node": {
+            "template": {
+              "input_value": {
+                "dynamic": true,
+                "required": true,
+                "placeholder": "",
+                "show": true,
+                "multiline": true,
+                "value": "",
+                "password": false,
+                "name": "input_value",
+                "display_name": "Text",
+                "type": "str",
+                "info": "",
+                "list": false
+              }
+            },
+            "description": "A chat output component for AI responses.",
+            "base_classes": [
+              "Message"
+            ],
+            "display_name": "Chat Output",
+            "documentation": "",
+            "custom_fields": {},
+            "output_types": [
+              "Message"
+            ]
+          }
+        }
+      }
+    ],
+    "edges": [
+      {
+        "source": "ChatInput-1",
+        "sourceHandle": "{œid∶ChatInput-1,outputName∶input_value,type∶str}",
+        "target": "OpenAI-1",
+        "targetHandle": "{œid∶OpenAI-1,inputName∶input_value,type∶str}",
+        "data": {
+          "targetHandle": {
+            "id": "OpenAI-1",
+            "inputName": "input_value",
+            "type": "str"
+          },
+          "sourceHandle": {
+            "id": "ChatInput-1",
+            "outputName": "input_value",
+            "type": "str"
+          }
+        },
+        "id": "reactflow__edge-ChatInput-1{œid∶ChatInput-1,outputName∶input_value,type∶str}-OpenAI-1{œid∶OpenAI-1,inputName∶input_value,type∶str}"
+      },
+      {
+        "source": "OpenAI-1",
+        "sourceHandle": "{œid∶OpenAI-1,outputName∶text,type∶Message}",
+        "target": "ChatOutput-1",
+        "targetHandle": "{œid∶ChatOutput-1,inputName∶input_value,type∶str}",
+        "data": {
+          "targetHandle": {
+            "id": "ChatOutput-1",
+            "inputName": "input_value",
+            "type": "str"
+          },
+          "sourceHandle": {
+            "id": "OpenAI-1",
+            "outputName": "text",
+            "type": "Message"
+          }
+        },
+        "id": "reactflow__edge-OpenAI-1{œid∶OpenAI-1,outputName∶text,type∶Message}-ChatOutput-1{œid∶ChatOutput-1,inputName∶input_value,type∶str}"
+      }
+    ]
+  },
+  "description": "Basic chat with GPT-4o - Simple chat flow using OpenAI's latest GPT-4o model. Add your API key to get started.",
+  "name": "Basic GPT-4o Chat",
+  "last_tested_version": "1.0.0"
+}

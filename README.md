@@ -8,6 +8,7 @@ Simple integration setup that connects Open WebUI with Langflow for AI workflow 
 - **Langflow Integration** - Custom pipeline for workflow execution
 - **Docker Ready** - Complete containerized deployment
 - **Pipeline Support** - Custom Python pipeline for Langflow communication
+- **AI Examples** - Ready-to-use workflow templates for Gemini, GPT-4o, and Claude
 
 ## 🛠 Tech Stack
 
@@ -41,16 +42,45 @@ Simple integration setup that connects Open WebUI with Langflow for AI workflow 
    - Langflow: http://localhost:7860
    - Pipelines: http://localhost:9099
 
+4. **Try the examples**:
+   ```bash
+   # Import ready-to-use AI workflows
+   ls examples/langflow-workflows/
+   # basic-gemini-chat.json   - Google Gemini 2.5 Flash
+   # basic-gpt4o-chat.json    - OpenAI GPT-4o  
+   # basic-claude-chat.json   - Anthropic Claude 3.5 Sonnet
+   ```
+
+## 🤖 AI Examples
+
+The `/examples` directory contains ready-to-use LangFlow workflow templates:
+
+- **[Basic AI Examples](examples/README.md)** - Simple "Chat Input → AI Model → Chat Output" flows
+- **Gemini 2.5 Flash** - Latest Google AI model
+- **GPT-4o** - Newest OpenAI model with multimodal capabilities
+- **Claude 3.5 Sonnet** - Advanced Anthropic reasoning model
+
+### Quick Start with Examples
+
+1. Open Langflow at http://localhost:7860
+2. Import any workflow from `examples/langflow-workflows/`
+3. Add your API key to the AI model component
+4. Copy the flow ID and use with Open WebUI
+
 ## 📁 Project Structure
 
 ```
 langflow-ui/
-├── pipelines/              # Python pipelines for Langflow integration
+├── examples/                # AI workflow examples and templates
+│   ├── langflow-workflows/  # Ready-to-use LangFlow JSON workflows
+│   ├── generate_workflows.py # Script to generate workflow templates  
+│   └── README.md            # Examples documentation
+├── pipelines/               # Python pipelines for Langflow integration
 │   ├── langflow_pipeline.py # Main pipeline implementation
-│   └── requirements.txt    # Python dependencies
-├── docker-compose.yml      # Container orchestration
-├── setup-openwebui.sh      # Setup script
-└── README.md               # This file
+│   └── requirements.txt     # Python dependencies
+├── docker-compose.yml       # Container orchestration
+├── setup-openwebui.sh       # Setup script
+└── README.md                # This file
 ```
 
 ## 🔧 Configuration
