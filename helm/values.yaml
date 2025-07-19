@@ -77,24 +77,71 @@ postgresql:
       memory: 512Mi
       cpu: 500m
 
-# MCP Server configuration
-mcp:
-  enabled: true
-  replicas: 1  # Easy to increase for adding more MCP servers
-  image:
-    repository: ghcr.io/open-webui/pipelines
-    tag: "main"
-    pullPolicy: IfNotPresent
-  service:
-    type: ClusterIP
-    port: 9099
-  resources:
-    requests:
-      memory: 256Mi
-      cpu: 250m
-    limits:
-      memory: 512Mi
-      cpu: 500m
+# MCP Servers configuration - Easy to add multiple servers for different apps
+mcpServers:
+  # Example MCP server for GitHub integration
+  github-mcp:
+    enabled: true
+    replicas: 1
+    image:
+      repository: modelcontextprotocol/server-github
+      tag: "latest"
+      pullPolicy: IfNotPresent
+    service:
+      type: ClusterIP
+      port: 9099
+    resources:
+      requests:
+        memory: 256Mi
+        cpu: 250m
+      limits:
+        memory: 512Mi
+        cpu: 500m
+    env:
+      - name: GITHUB_PERSONAL_ACCESS_TOKEN
+        value: ""  # Set your token here
+  
+  # Example MCP server for filesystem operations
+  filesystem-mcp:
+    enabled: false
+    replicas: 1
+    image:
+      repository: modelcontextprotocol/server-filesystem
+      tag: "latest"
+      pullPolicy: IfNotPresent
+    service:
+      type: ClusterIP
+      port: 9100
+    resources:
+      requests:
+        memory: 128Mi
+        cpu: 100m
+      limits:
+        memory: 256Mi
+        cpu: 250m
+    env: []
+
+  # Example MCP server for web scraping
+  brave-search-mcp:
+    enabled: false
+    replicas: 1
+    image:
+      repository: modelcontextprotocol/server-brave-search
+      tag: "latest"
+      pullPolicy: IfNotPresent
+    service:
+      type: ClusterIP
+      port: 9101
+    resources:
+      requests:
+        memory: 256Mi
+        cpu: 250m
+      limits:
+        memory: 512Mi
+        cpu: 500m
+    env:
+      - name: BRAVE_API_KEY
+        value: ""  # Set your API key here
 
 # Open WebUI configuration (optional)
 openwebui:

@@ -24,9 +24,19 @@
 2. LangFlow is now deployed with:
    - Dedicated PostgreSQL database: {{ .Values.postgresql.auth.database }}
    - Database user: {{ .Values.postgresql.auth.username }}
-{{- if .Values.mcp.enabled }}
-   - MCP servers: {{ .Values.mcp.replicas }} replicas
-   - MCP service: {{ include "langflow-app.fullname" . }}-mcp
+{{- $mcpCount := 0 }}
+{{- range $serverName, $server := .Values.mcpServers }}
+{{- if $server.enabled }}
+{{- $mcpCount = add $mcpCount 1 }}
+{{- end }}
+{{- end }}
+{{- if gt $mcpCount 0 }}
+   - MCP servers deployed: {{ $mcpCount }}
+{{- range $serverName, $server := .Values.mcpServers }}
+{{- if $server.enabled }}
+     * {{ $serverName }}: {{ $server.replicas }} replicas ({{ $server.image.repository }}:{{ $server.image.tag }})
+{{- end }}
+{{- end }}
 {{- end }}
 {{- if .Values.openwebui.enabled }}
    - OpenWebUI interface available at port {{ .Values.openwebui.service.port }}
@@ -35,11 +45,26 @@
 3. Default credentials:
    - LangFlow admin: {{ .Values.config.langflowSuperuser }} / {{ .Values.config.langflowSuperuserPassword }}
 
-4. To scale MCP servers:
-   helm upgrade {{ .Release.Name }} ./helm --set mcp.replicas=3
+4. To add a new MCP server, add it to values.yaml:
+   mcpServers:
+     your-custom-server:
+       enabled: true
+       replicas: 1
+       image:
+         repository: your-mcp-server-image
+         tag: "latest"
+       service:
+         type: ClusterIP
+         port: 9102
+       env:
+         - name: YOUR_CONFIG
+           value: "your-value"
 
-5. To access logs:
+5. To scale existing MCP servers:
+   helm upgrade {{ .Release.Name }} ./helm --set mcpServers.github-mcp.replicas=3
+
+6. To access logs:
    kubectl logs -f deployment/{{ include "langflow-app.fullname" . }} -n {{ .Release.Namespace }}
 
-6. To check all services:
+7. To check all services:
    kubectl get all -l app.kubernetes.io/instance={{ .Release.Name }} -n {{ .Release.Namespace }}
