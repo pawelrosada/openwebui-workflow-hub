@@ -7,6 +7,10 @@ on:
   push:
     branches: [main, develop]
 
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
   pre-commit:
     runs-on: ubuntu-latest
@@ -15,6 +19,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
+          token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
 
       - name: Set up Python
@@ -43,6 +48,7 @@ jobs:
           shellcheck --version
 
       - name: Run pre-commit hooks (with retry and fault tolerance)
+        id: precommit
         run: |
           pre-commit install
           
@@ -69,17 +75,20 @@ jobs:
               chmod +x ./validate-code.sh
               ./validate-code.sh
               
+              echo "precommit-failed=network" >> $GITHUB_OUTPUT
               exit 0  # Don't fail the build for network issues
             else
               echo "Pre-commit failed with code quality issues"
+              echo "precommit-failed=quality" >> $GITHUB_OUTPUT
               exit $PRECOMMIT_STATUS
             fi
           fi
           
           echo "Pre-commit validation completed successfully"
+          echo "precommit-failed=false" >> $GITHUB_OUTPUT
 
       - name: Auto-fix and commit changes
-        if: failure()
+        if: failure() && steps.precommit.outputs.precommit-failed == 'quality'
         run: |
           # Configure git
           git config --local user.email "action@github.com"
@@ -91,19 +100,32 @@ jobs:
             git add -A
             git commit -m "Auto-fix: Apply pre-commit formatting [skip ci]" || true
             
-            # Only push if this is a PR from a fork or if we have permission
+            # Only push if this is a PR from the same repo (not a fork)
             if [ "${{ github.event_name }}" = "pull_request" ] && [ "${{ github.event.pull_request.head.repo.full_name }}" = "${{ github.repository }}" ]; then
+              echo "Attempting to push auto-fixes..."
+              set +e  # Don't fail immediately on push errors
               git push
+              PUSH_STATUS=$?
+              set -e
+              
+              if [ $PUSH_STATUS -ne 0 ]; then
+                echo "::warning::Failed to push auto-fixes (exit code: $PUSH_STATUS)"
+                echo "::notice::Please run 'pre-commit run --all-files' locally and commit the changes manually"
+                # Don't fail the workflow due to push issues
+              else
+                echo "Successfully pushed auto-fixes"
+              fi
             else
               echo "Skipping auto-push - either not a PR or from a fork"
-              echo "Please run 'pre-commit run --all-files' locally and commit the changes"
+              echo "::notice::Please run 'pre-commit run --all-files' locally and commit the changes"
             fi
           else
             echo "No formatting changes needed"
           fi
           
-          # Don't fail the job if we're dealing with network issues
+          # Don't fail the job - auto-fix is best effort
           echo "Auto-fix step completed"
+          exit 0
 
       - name: Final validation
         if: success()  # Only run if the main step succeeded
