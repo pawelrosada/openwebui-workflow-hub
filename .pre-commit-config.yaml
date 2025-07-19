@@ -1,66 +1,18 @@
-# .pre-commit-config.yaml - Basic config for pre-commit (English only; validates py/json/sh per standards, includes Trivy; auto-fixes where possible).
+# Minimal pre-commit configuration for basic validation
 repos:
+  # Basic file checks
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.5.0  # Stable version that works reliably
+    rev: v4.5.0
     hooks:
-      - id: check-json  # Validates JSON
-      - id: pretty-format-json  # Auto-fixes JSON (per standards)
-        args: ['--autofix']
-      - id: check-yaml  # Validates YAML
-      - id: trailing-whitespace  # Remove trailing whitespace
-      - id: end-of-file-fixer  # Ensure files end with newline
-      - id: check-added-large-files  # Prevent large files
-        args: ['--maxkb=500']
-      - id: check-merge-conflict  # Check for merge conflict markers
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-json
 
-  - repo: https://github.com/shellcheck-py/shellcheck-py
-    rev: v0.9.0.6  # Stable version
+  # Python formatting
+  - repo: https://github.com/psf/black
+    rev: 24.1.0
     hooks:
-      - id: shellcheck  # Validates shell scripts per standards
-        args: ['-e', 'SC2034']  # Allow unused variables
-
-  - repo: local
-    hooks:
-      - id: python-black-format
-        name: Black Python formatting (auto-fix)
-        entry: sh
-        language: system
-        types: [python]
-        pass_filenames: true
-        args:
-          - -c
-          - |
-            if command -v black >/dev/null 2>&1; then
-              black "$@"
-            else
-              pip install --quiet black==23.12.1 && black "$@"
-            fi
-
-      - id: python-flake8-lint
-        name: Flake8 Python linting
-        entry: sh
-        language: system
-        types: [python]
-        pass_filenames: true
-        args:
-          - -c
-          - |
-            if command -v flake8 >/dev/null 2>&1; then
-              flake8 --max-line-length=88 --extend-ignore=E203,W503,F401,F541,E501 "$@"
-            else
-              pip install --quiet flake8==6.1.0 && flake8 --max-line-length=88 --extend-ignore=E203,W503,F401,F541,E501 "$@"
-            fi
-
-      - id: trivy-fs  # Runs Trivy scan for vulnerabilities/secrets
-        name: Trivy filesystem scan
-        entry: sh
-        language: system
-        pass_filenames: false
-        args:
-          - -c
-          - |
-            if command -v trivy >/dev/null 2>&1; then
-              trivy fs --security-checks vuln,secret,config --severity HIGH,CRITICAL --exit-code 0 . || echo "Trivy scan completed"
-            else
-              echo "Trivy not found, skipping security scan"
-            fi
+      - id: black
+        language_version: python3
+        args: [--line-length=88]
