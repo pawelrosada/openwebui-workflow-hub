@@ -1,0 +1,275 @@
+{
+  "data": {
+    "edges": [
+      {
+        "className": "",
+        "data": {},
+        "id": "e1-2",
+        "source": "1",
+        "sourceHandle": "message-output",
+        "target": "2",
+        "targetHandle": "message-input",
+        "type": "default"
+      },
+      {
+        "className": "",
+        "data": {},
+        "id": "e2-3",
+        "source": "2",
+        "sourceHandle": "text-output",
+        "target": "3",
+        "targetHandle": "text-input",
+        "type": "default"
+      }
+    ],
+    "nodes": [
+      {
+        "data": {
+          "id": "ChatInput-1",
+          "node": {
+            "base_classes": ["Message"],
+            "description": "Get chat message from the user.",
+            "display_name": "Chat Input",
+            "documentation": "",
+            "icon": "ChatInput",
+            "template": {
+              "files": {
+                "display_name": "Files",
+                "field_type": "file",
+                "required": false,
+                "show": true,
+                "value": ""
+              },
+              "input_value": {
+                "display_name": "Text",
+                "multiline": true,
+                "required": true,
+                "show": true,
+                "type": "str",
+                "value": ""
+              },
+              "sender": {
+                "display_name": "Sender Type",
+                "options": ["Machine", "User"],
+                "required": false,
+                "show": true,
+                "type": "str",
+                "value": "User"
+              },
+              "sender_name": {
+                "display_name": "Sender Name",
+                "required": false,
+                "show": true,
+                "type": "str",
+                "value": ""
+              },
+              "session_id": {
+                "display_name": "Session ID",
+                "required": false,
+                "show": true,
+                "type": "str",
+                "value": ""
+              }
+            },
+            "type": "ChatInput"
+          },
+          "type": "ChatInput"
+        },
+        "height": 328,
+        "id": "1",
+        "position": {
+          "x": 100,
+          "y": 100
+        },
+        "positionAbsolute": {
+          "x": 100,
+          "y": 100
+        },
+        "selected": false,
+        "type": "genericNode",
+        "width": 384
+      },
+      {
+        "data": {
+          "id": "OpenAI-2",
+          "node": {
+            "base_classes": ["LanguageModel"],
+            "description": "OpenAI large language models like GPT-4.",
+            "display_name": "OpenAI",
+            "documentation": "",
+            "icon": "OpenAI",
+            "template": {
+              "api_key": {
+                "display_name": "OpenAI API Key",
+                "password": true,
+                "required": true,
+                "show": true,
+                "type": "str",
+                "value": ""
+              },
+              "base_url": {
+                "display_name": "Base URL",
+                "required": false,
+                "show": true,
+                "type": "str",
+                "value": "https://api.openai.com/v1"
+              },
+              "input_value": {
+                "display_name": "Input",
+                "input_types": ["Message"],
+                "required": true,
+                "show": true,
+                "type": "str",
+                "value": ""
+              },
+              "max_tokens": {
+                "display_name": "Max Tokens",
+                "required": false,
+                "show": true,
+                "type": "int",
+                "value": 1000
+              },
+              "model_name": {
+                "display_name": "Model Name",
+                "options": [
+                  "gpt-4",
+                  "gpt-4-turbo",
+                  "gpt-4o",
+                  "gpt-4o-mini",
+                  "gpt-3.5-turbo"
+                ],
+                "required": true,
+                "show": true,
+                "type": "str",
+                "value": "gpt-4o"
+              },
+              "presence_penalty": {
+                "display_name": "Presence Penalty",
+                "required": false,
+                "show": true,
+                "type": "float",
+                "value": 0
+              },
+              "seed": {
+                "display_name": "Seed",
+                "required": false,
+                "show": false,
+                "type": "int",
+                "value": 1
+              },
+              "system_message": {
+                "display_name": "System Message",
+                "multiline": true,
+                "required": false,
+                "show": true,
+                "type": "str",
+                "value": "Jesteś pomocnym asystentem AI. Odpowiadaj w języku polskim, chyba że użytkownik poprosi o inny język."
+              },
+              "temperature": {
+                "display_name": "Temperature",
+                "required": false,
+                "show": true,
+                "type": "float",
+                "value": 0.1
+              },
+              "top_p": {
+                "display_name": "Top P",
+                "required": false,
+                "show": true,
+                "type": "float",
+                "value": 1
+              }
+            },
+            "type": "OpenAI"
+          },
+          "type": "OpenAI"
+        },
+        "height": 626,
+        "id": "2",
+        "position": {
+          "x": 600,
+          "y": 100
+        },
+        "positionAbsolute": {
+          "x": 600,
+          "y": 100
+        },
+        "selected": false,
+        "type": "genericNode",
+        "width": 384
+      },
+      {
+        "data": {
+          "id": "ChatOutput-3",
+          "node": {
+            "base_classes": ["Message"],
+            "description": "Display a chat message in the Playground.",
+            "display_name": "Chat Output",
+            "documentation": "",
+            "icon": "ChatOutput",
+            "template": {
+              "data_template": {
+                "display_name": "Data Template",
+                "multiline": true,
+                "required": false,
+                "show": true,
+                "type": "str",
+                "value": "{text}"
+              },
+              "input_value": {
+                "display_name": "Text",
+                "input_types": ["Message", "Text"],
+                "required": true,
+                "show": true,
+                "type": "str",
+                "value": ""
+              },
+              "sender": {
+                "display_name": "Sender Type",
+                "options": ["Machine", "User"],
+                "required": false,
+                "show": true,
+                "type": "str",
+                "value": "Machine"
+              },
+              "sender_name": {
+                "display_name": "Sender Name",
+                "required": false,
+                "show": true,
+                "type": "str",
+                "value": "GPT-4o"
+              },
+              "session_id": {
+                "display_name": "Session ID",
+                "required": false,
+                "show": true,
+                "type": "str",
+                "value": ""
+              }
+            },
+            "type": "ChatOutput"
+          },
+          "type": "ChatOutput"
+        },
+        "height": 346,
+        "id": "3",
+        "position": {
+          "x": 1100,
+          "y": 100
+        },
+        "positionAbsolute": {
+          "x": 1100,
+          "y": 100
+        },
+        "selected": false,
+        "type": "genericNode",
+        "width": 384
+      }
+    ]
+  },
+  "description": "Podstawowy przepływ chat z OpenAI GPT-4o - najnowszy model OpenAI. Chat Input → GPT-4o → Chat Output. Skonfiguruj OpenAI API Key aby rozpocząć używanie.",
+  "name": "GPT-4o Chat - Podstawowy",
+  "endpoint_name": "gpt4o-chat-basic",
+  "last_tested_version": "1.0.9",
+  "langflow_version": "1.0.9"
+}

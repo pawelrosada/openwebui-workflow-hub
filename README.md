@@ -7,6 +7,7 @@ Modern ChatGPT-like interface for Langflow workflows built with Node.js, TypeScr
 - **Modern Chat Interface** - ChatGPT/Perplexity-inspired design
 - **Real-time Communication** - WebSocket support for live updates
 - **Langflow Integration** - Seamless connection to Langflow workflows
+- **AI Model Catalog** - Ready-to-use examples for Gemini, GPT-4, and Claude-3
 - **Session Management** - Persistent chat sessions
 - **Responsive Design** - Works on desktop and mobile
 - **Dark/Light Theme** - Toggle between themes
@@ -60,6 +61,23 @@ Modern ChatGPT-like interface for Langflow workflows built with Node.js, TypeScr
    - Chat UI: http://localhost
    - Langflow: http://localhost/langflow
    - API Health: http://localhost:3000/api/health
+
+### AI Model Examples
+
+Ready-to-use Langflow examples are available in the `catalog/` directory:
+
+- **🤖 Gemini Pro** - Google's latest AI model
+- **🤖 GPT-4o** - OpenAI's most advanced model  
+- **🤖 Claude-3.5** - Anthropic's newest model
+
+**Quick Start with Examples:**
+1. Run `./setup-openwebui.sh` to start all services
+2. Open http://localhost:7860 (Langflow)
+3. Import flows from `catalog/flows/`
+4. Configure your API keys
+5. Test in Open WebUI: `@flow:flow-name your message`
+
+📚 **[Full Catalog Documentation →](catalog/README.md)**
 
 ### Development Setup
 

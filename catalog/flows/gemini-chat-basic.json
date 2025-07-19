@@ -1,0 +1,267 @@
+{
+  "data": {
+    "edges": [
+      {
+        "className": "",
+        "data": {},
+        "id": "e1-2",
+        "source": "1",
+        "sourceHandle": "message-output",
+        "target": "2",
+        "targetHandle": "message-input",
+        "type": "default"
+      },
+      {
+        "className": "",
+        "data": {},
+        "id": "e2-3",
+        "source": "2",
+        "sourceHandle": "text-output",
+        "target": "3",
+        "targetHandle": "text-input",
+        "type": "default"
+      }
+    ],
+    "nodes": [
+      {
+        "data": {
+          "id": "ChatInput-1",
+          "node": {
+            "base_classes": ["Message"],
+            "description": "Get chat message from the user.",
+            "display_name": "Chat Input",
+            "documentation": "",
+            "icon": "ChatInput",
+            "template": {
+              "files": {
+                "display_name": "Files",
+                "field_type": "file",
+                "required": false,
+                "show": true,
+                "value": ""
+              },
+              "input_value": {
+                "display_name": "Text",
+                "multiline": true,
+                "required": true,
+                "show": true,
+                "type": "str",
+                "value": ""
+              },
+              "sender": {
+                "display_name": "Sender Type",
+                "options": ["Machine", "User"],
+                "required": false,
+                "show": true,
+                "type": "str",
+                "value": "User"
+              },
+              "sender_name": {
+                "display_name": "Sender Name",
+                "required": false,
+                "show": true,
+                "type": "str",
+                "value": ""
+              },
+              "session_id": {
+                "display_name": "Session ID",
+                "required": false,
+                "show": true,
+                "type": "str",
+                "value": ""
+              }
+            },
+            "type": "ChatInput"
+          },
+          "type": "ChatInput"
+        },
+        "height": 328,
+        "id": "1",
+        "position": {
+          "x": 100,
+          "y": 100
+        },
+        "positionAbsolute": {
+          "x": 100,
+          "y": 100
+        },
+        "selected": false,
+        "type": "genericNode",
+        "width": 384
+      },
+      {
+        "data": {
+          "id": "GoogleGenerativeAI-2",
+          "node": {
+            "base_classes": ["LanguageModel"],
+            "description": "Google Generative AI models like Gemini Pro.",
+            "display_name": "Google Generative AI",
+            "documentation": "",
+            "icon": "Google",
+            "template": {
+              "google_api_key": {
+                "display_name": "Google API Key",
+                "password": true,
+                "required": true,
+                "show": true,
+                "type": "str",
+                "value": ""
+              },
+              "input_value": {
+                "display_name": "Input",
+                "input_types": ["Message"],
+                "required": true,
+                "show": true,
+                "type": "str",
+                "value": ""
+              },
+              "max_output_tokens": {
+                "display_name": "Max Output Tokens",
+                "required": false,
+                "show": true,
+                "type": "int",
+                "value": 1024
+              },
+              "model": {
+                "display_name": "Model",
+                "options": [
+                  "gemini-pro",
+                  "gemini-pro-vision",
+                  "gemini-1.5-pro-latest",
+                  "gemini-1.5-flash-latest"
+                ],
+                "required": true,
+                "show": true,
+                "type": "str",
+                "value": "gemini-1.5-pro-latest"
+              },
+              "safety_settings": {
+                "display_name": "Safety Settings",
+                "required": false,
+                "show": true,
+                "type": "dict",
+                "value": {}
+              },
+              "system_message": {
+                "display_name": "System Message",
+                "multiline": true,
+                "required": false,
+                "show": true,
+                "type": "str",
+                "value": "Jesteś pomocnym asystentem AI. Odpowiadaj w języku polskim, chyba że użytkownik poprosi o inny język."
+              },
+              "temperature": {
+                "display_name": "Temperature",
+                "required": false,
+                "show": true,
+                "type": "float",
+                "value": 0.1
+              },
+              "top_k": {
+                "display_name": "Top K",
+                "required": false,
+                "show": true,
+                "type": "int",
+                "value": 40
+              },
+              "top_p": {
+                "display_name": "Top P",
+                "required": false,
+                "show": true,
+                "type": "float",
+                "value": 0.95
+              }
+            },
+            "type": "GoogleGenerativeAI"
+          },
+          "type": "GoogleGenerativeAI"
+        },
+        "height": 626,
+        "id": "2",
+        "position": {
+          "x": 600,
+          "y": 100
+        },
+        "positionAbsolute": {
+          "x": 600,
+          "y": 100
+        },
+        "selected": false,
+        "type": "genericNode",
+        "width": 384
+      },
+      {
+        "data": {
+          "id": "ChatOutput-3",
+          "node": {
+            "base_classes": ["Message"],
+            "description": "Display a chat message in the Playground.",
+            "display_name": "Chat Output",
+            "documentation": "",
+            "icon": "ChatOutput",
+            "template": {
+              "data_template": {
+                "display_name": "Data Template",
+                "multiline": true,
+                "required": false,
+                "show": true,
+                "type": "str",
+                "value": "{text}"
+              },
+              "input_value": {
+                "display_name": "Text",
+                "input_types": ["Message", "Text"],
+                "required": true,
+                "show": true,
+                "type": "str",
+                "value": ""
+              },
+              "sender": {
+                "display_name": "Sender Type",
+                "options": ["Machine", "User"],
+                "required": false,
+                "show": true,
+                "type": "str",
+                "value": "Machine"
+              },
+              "sender_name": {
+                "display_name": "Sender Name",
+                "required": false,
+                "show": true,
+                "type": "str",
+                "value": "Gemini Pro"
+              },
+              "session_id": {
+                "display_name": "Session ID",
+                "required": false,
+                "show": true,
+                "type": "str",
+                "value": ""
+              }
+            },
+            "type": "ChatOutput"
+          },
+          "type": "ChatOutput"
+        },
+        "height": 346,
+        "id": "3",
+        "position": {
+          "x": 1100,
+          "y": 100
+        },
+        "positionAbsolute": {
+          "x": 1100,
+          "y": 100
+        },
+        "selected": false,
+        "type": "genericNode",
+        "width": 384
+      }
+    ]
+  },
+  "description": "Podstawowy przepływ chat z Google Gemini Pro - najnowszy model Google AI. Chat Input → Gemini 1.5 Pro → Chat Output. Skonfiguruj Google API Key aby rozpocząć używanie.",
+  "name": "Gemini Pro Chat - Podstawowy",
+  "endpoint_name": "gemini-chat-basic",
+  "last_tested_version": "1.0.9",
+  "langflow_version": "1.0.9"
+}
