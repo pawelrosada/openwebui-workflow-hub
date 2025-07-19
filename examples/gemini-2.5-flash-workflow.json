@@ -41,27 +41,27 @@
         }
       },
       {
-        "id": "OpenAI-1",
-        "type": "OpenAI",
+        "id": "GoogleAI-1",
+        "type": "GoogleAI",
         "position": {
           "x": 400,
           "y": 200
         },
         "data": {
-          "type": "OpenAI",
+          "type": "GoogleAI",
           "node": {
             "template": {
-              "openai_api_key": {
+              "google_api_key": {
                 "required": true,
                 "placeholder": "",
                 "show": true,
                 "multiline": false,
                 "value": "",
                 "password": true,
-                "name": "openai_api_key",
-                "display_name": "OpenAI API Key",
+                "name": "google_api_key",
+                "display_name": "Google API Key",
                 "type": "str",
-                "info": "Enter your OpenAI API key here",
+                "info": "Enter your Google AI API key here",
                 "list": false
               },
               "model": {
@@ -69,18 +69,17 @@
                 "placeholder": "",
                 "show": true,
                 "multiline": false,
-                "value": "gpt-4o",
+                "value": "gemini-2.5-flash",
                 "password": false,
                 "name": "model",
                 "display_name": "Model",
                 "type": "str",
-                "info": "OpenAI model to use",
+                "info": "Google AI model to use",
                 "list": false,
                 "options": [
-                  "gpt-4o",
-                  "gpt-4o-mini",
-                  "gpt-4-turbo",
-                  "gpt-3.5-turbo"
+                  "gemini-2.5-flash",
+                  "gemini-pro",
+                  "gemini-pro-vision"
                 ]
               },
               "temperature": {
@@ -94,19 +93,6 @@
                 "display_name": "Temperature",
                 "type": "float",
                 "info": "Controls randomness in responses",
-                "list": false
-              },
-              "max_tokens": {
-                "required": false,
-                "placeholder": "",
-                "show": true,
-                "multiline": false,
-                "value": 1000,
-                "password": false,
-                "name": "max_tokens",
-                "display_name": "Max Tokens",
-                "type": "int",
-                "info": "Maximum number of tokens to generate",
                 "list": false
               },
               "input_value": {
@@ -124,12 +110,12 @@
                 "list": false
               }
             },
-            "description": "OpenAI LLM component using GPT models.",
+            "description": "Google AI LLM component using Gemini models.",
             "base_classes": [
               "BaseLanguageModel",
               "LanguageModel"
             ],
-            "display_name": "OpenAI",
+            "display_name": "Google AI",
             "documentation": "",
             "custom_fields": {},
             "output_types": [
@@ -182,11 +168,11 @@
       {
         "source": "ChatInput-1",
         "sourceHandle": "{œid∶ChatInput-1,outputName∶input_value,type∶str}",
-        "target": "OpenAI-1",
-        "targetHandle": "{œid∶OpenAI-1,inputName∶input_value,type∶str}",
+        "target": "GoogleAI-1",
+        "targetHandle": "{œid∶GoogleAI-1,inputName∶input_value,type∶str}",
         "data": {
           "targetHandle": {
-            "id": "OpenAI-1",
+            "id": "GoogleAI-1",
             "inputName": "input_value",
             "type": "str"
           },
@@ -196,11 +182,11 @@
             "type": "str"
           }
         },
-        "id": "reactflow__edge-ChatInput-1{œid∶ChatInput-1,outputName∶input_value,type∶str}-OpenAI-1{œid∶OpenAI-1,inputName∶input_value,type∶str}"
+        "id": "reactflow__edge-ChatInput-1{œid∶ChatInput-1,outputName∶input_value,type∶str}-GoogleAI-1{œid∶GoogleAI-1,inputName∶input_value,type∶str}"
       },
       {
-        "source": "OpenAI-1",
-        "sourceHandle": "{œid∶OpenAI-1,outputName∶text,type∶Message}",
+        "source": "GoogleAI-1",
+        "sourceHandle": "{œid∶GoogleAI-1,outputName∶text,type∶Message}",
         "target": "ChatOutput-1",
         "targetHandle": "{œid∶ChatOutput-1,inputName∶input_value,type∶str}",
         "data": {
@@ -210,16 +196,16 @@
             "type": "str"
           },
           "sourceHandle": {
-            "id": "OpenAI-1",
+            "id": "GoogleAI-1",
             "outputName": "text",
             "type": "Message"
           }
         },
-        "id": "reactflow__edge-OpenAI-1{œid∶OpenAI-1,outputName∶text,type∶Message}-ChatOutput-1{œid∶ChatOutput-1,inputName∶input_value,type∶str}"
+        "id": "reactflow__edge-GoogleAI-1{œid∶GoogleAI-1,outputName∶text,type∶Message}-ChatOutput-1{œid∶ChatOutput-1,inputName∶input_value,type∶str}"
       }
     ]
   },
-  "description": "Basic chat with GPT-4o - Simple chat flow using OpenAI's latest GPT-4o model. Add your API key to get started.",
-  "name": "Basic GPT-4o Chat",
+  "description": "Simple Gemini 2.5 Flash chat pipeline for LangFlow.",
+  "name": "Basic Gemini 2.5 Flash Chat",
   "last_tested_version": "1.0.0"
 }
