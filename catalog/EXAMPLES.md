@@ -1,65 +1,65 @@
-# 📖 Przykłady Użycia AI Catalog
+# 📖 AI Catalog Usage Examples
 
-Przykłady praktycznego wykorzystania katalogu AI w środowisku Langflow + Open WebUI.
+Examples of practical use of the AI catalog in the Langflow + Open WebUI environment.
 
-## 🚀 Przykład 1: Import i Konfiguracja Gemini
+## 🚀 Example 1: Import and Configure Gemini
 
-### Krok 1: Import przepływu
+### Step 1: Import workflow
 ```bash
-# Uruchom środowisko
+# Start environment
 ./setup-openwebui.sh
 
-# Otwórz Langflow
+# Open Langflow
 # http://localhost:7860
 ```
 
-### Krok 2: Załaduj przepływ Gemini
-1. W Langflow kliknij **"+ New Flow"**
-2. Wybierz **"Import from JSON"**
-3. Załaduj `catalog/flows/gemini-chat-basic.json`
-4. Przepływ pojawi się z trzema komponentami:
-   - **Chat Input** (wiadomość od użytkownika)
+### Step 2: Load Gemini workflow
+1. In Langflow click **"+ New Flow"**
+2. Select **"Import from JSON"**
+3. Load `catalog/flows/gemini-chat-basic.json`
+4. The workflow will appear with three components:
+   - **Chat Input** (message from user)
    - **Google Generative AI** (Gemini Pro)
-   - **Chat Output** (odpowiedź do użytkownika)
+   - **Chat Output** (response to user)
 
-### Krok 3: Konfiguracja API Key
+### Step 3: API Key configuration
 ```json
 {
   "google_api_key": "AIza-your-google-api-key-here",
   "model": "gemini-1.5-pro-latest",
   "temperature": 0.1,
-  "system_message": "Jesteś pomocnym asystentem AI. Odpowiadaj w języku polskim."
+  "system_message": "You are a helpful AI assistant. Respond in English."
 }
 ```
 
-### Krok 4: Test w Playground
+### Step 4: Test in Playground
 ```
-Wiadomość: "Opowiedz mi o sztucznej inteligencji"
-Oczekiwana odpowiedź: Szczegółowa odpowiedź po polsku o AI
+Message: "Tell me about artificial intelligence"
+Expected response: Detailed response in English about AI
 ```
 
-## 🚀 Przykład 2: Użycie Multiple Models
+## 🚀 Example 2: Using Multiple Models
 
-### Szenariusz: Różne AI dla różnych zadań
+### Scenario: Different AI for different tasks
 
-**GPT-4o dla pisania:**
+**GPT-4o for writing:**
 ```bash
-@flow:gpt4o-chat-basic Napisz artykuł o przyszłości pracy zdalnej
+@flow:gpt4o-chat-basic Write an article about the future of remote work
 ```
 
-**Gemini dla analiz:**
+**Gemini for analysis:**
 ```bash
-@flow:gemini-chat-basic Przeanalizuj trendy w branży technologicznej
+@flow:gemini-chat-basic Analyze trends in the technology industry
 ```
 
-**Claude dla kreatywności:**
+**Claude for creativity:**
 ```bash
-@flow:claude3-chat-basic Wymyśl innowacyjny pomysł na aplikację mobile
+@flow:claude3-chat-basic Create an innovative idea for a mobile app
 ```
 
-## 🚀 Przykład 3: Custom Pipeline Integration
+## 🚀 Example 3: Custom Pipeline Integration
 
-### Tworzenie własnego pipeline
+### Creating custom pipeline
 
 ```python
 # custom_ai_pipeline.py
@@ -71,15 +71,15 @@ class CustomMultiModelPipeline:
         self.name = "Multi-Model Pipeline"
     
     def pipe(self, user_message: str, model_id: str, messages: list, body: dict):
-        # Logika wyboru modelu na podstawie typu zapytania
-        if "kod" in user_message.lower() or "program" in user_message.lower():
+        # Logic for model selection based on query type
+        if "code" in user_message.lower() or "program" in user_message.lower():
             return self.gemini.pipe(user_message, model_id, messages, body)
-        # ... inne modele
+        # ... other models
 ```
 
-## 🚀 Przykład 4: Production Setup
+## 🚀 Example 4: Production Setup
 
-### Docker Compose z konfiguracją production
+### Docker Compose with production configuration
 
 ```yaml
 # docker-compose.prod.yml
@@ -110,17 +110,17 @@ ANTHROPIC_API_KEY=sk-ant-your-anthropic-key
 LANGFLOW_SECRET_KEY=your-secret-key
 ```
 
-## 🚀 Przykład 5: Monitoring i Logging
+## 🚀 Example 5: Monitoring and Logging
 
-### Sprawdzenie logów pipeline
+### Checking pipeline logs
 ```bash
-# Logi wszystkich serwisów
+# All services logs
 docker-compose logs -f
 
-# Logi konkretnego pipeline
+# Specific pipeline logs
 docker-compose logs -f pipelines | grep "Gemini"
 
-# Metryki wydajności
+# Performance metrics
 docker-compose exec pipelines python3 -c "
 from catalog.pipelines.gemini_chat_pipeline import Pipeline
 p = Pipeline()
@@ -131,22 +131,22 @@ print(f'Config: {p.valves}')
 
 ### Health Check Endpoints
 ```bash
-# Sprawdź status Langflow
+# Check Langflow status
 curl http://localhost:7860/health
 
-# Sprawdź dostępne przepływy
+# Check available workflows
 curl http://localhost:7860/api/v1/flows
 
-# Test pipeline bezpośrednio
+# Test pipeline directly
 curl -X POST http://localhost:9099/v1/chat/completions \
   -H "Content-Type: application/json" \
   -d '{
     "model": "gemini-pipeline",
-    "messages": [{"role": "user", "content": "Test wiadomość"}]
+    "messages": [{"role": "user", "content": "Test message"}]
   }'
 ```
 
-## 🚀 Przykład 6: Skalowanie i Load Balancing
+## 🚀 Example 6: Scaling and Load Balancing
 
 ### Multiple Pipeline Instances
 ```yaml
@@ -186,13 +186,13 @@ server {
 }
 ```
 
-## 🚀 Przykład 7: Custom Flow Modifications
+## 🚀 Example 7: Custom Flow Modifications
 
-### Rozszerzenie bazowego przepływu
+### Extending basic workflow
 ```json
 {
   "name": "Enhanced Gemini with Memory",
-  "description": "Gemini z pamięcią konwersacji",
+  "description": "Gemini with conversation memory",
   "nodes": [
     {"type": "ChatInput"},
     {"type": "ConversationMemory", "config": {"max_turns": 10}},
@@ -202,9 +202,9 @@ server {
 }
 ```
 
-## 📊 Metryki i Benchmarking
+## 📊 Metrics and Benchmarking
 
-### Porównanie modeli
+### Model comparison
 | Model | Avg Response Time | Cost per 1K tokens | Quality Score |
 |-------|-------------------|-------------------|---------------|
 | Gemini 1.5 Pro | 2.3s | $0.001 | 8.5/10 |
@@ -213,7 +213,7 @@ server {
 
 ### Monitoring Dashboard
 ```python
-# monitoring.py - prosty dashboard
+# monitoring.py - simple dashboard
 import streamlit as st
 from catalog.pipelines import *
 
@@ -225,15 +225,15 @@ st.metric("Claude Requests", "645", "↑8%")
 
 ## 🔧 Troubleshooting Common Issues
 
-### Problem: API Key nie działa
+### Problem: API Key not working
 ```bash
-# Sprawdź czy klucz jest poprawnie ustawiony
+# Check if key is properly set
 docker-compose exec pipelines python3 -c "
 import os
 print('GEMINI_API_KEY:', 'SET' if os.getenv('GEMINI_API_KEY') else 'NOT SET')
 "
 
-# Test klucza bezpośrednio
+# Test key directly
 python3 -c "
 import httpx
 response = httpx.get('https://generativelanguage.googleapis.com/v1/models', 
@@ -242,15 +242,15 @@ print(response.status_code)
 "
 ```
 
-### Problem: Przepływ nie odpowiada
+### Problem: Workflow not responding
 ```bash
-# Sprawdź logi Langflow
+# Check Langflow logs
 docker-compose logs langflow | tail -50
 
-# Restart konkretnego serwisu
+# Restart specific service
 docker-compose restart langflow
 
-# Test endpoint bezpośrednio
+# Test endpoint directly
 curl -X POST http://localhost:7860/api/v1/run/gemini-chat-basic \
   -H "Content-Type: application/json" \
   -d '{"input_value": "test", "input_type": "chat"}'
@@ -269,7 +269,7 @@ curl -X POST http://localhost:7860/api/v1/run/gemini-chat-basic \
 7. **Document custom modifications**
 8. **Test with real user scenarios**
 
-## 🔗 Linki Pomocne
+## 🔗 Helpful Links
 
 - [Langflow Documentation](https://docs.langflow.org/)
 - [Open WebUI Pipelines Guide](https://docs.openwebui.com/pipelines/)
@@ -279,4 +279,4 @@ curl -X POST http://localhost:7860/api/v1/run/gemini-chat-basic \
 
 ---
 
-*Potrzebujesz więcej przykładów? Zobacz [catalog/README.md](README.md) lub [QUICKSTART.md](QUICKSTART.md)*
+*Need more examples? See [catalog/README.md](README.md) or [QUICKSTART.md](QUICKSTART.md)*

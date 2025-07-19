@@ -1,87 +1,87 @@
-# 📚 Katalog Przykładów Langflow
+# 📚 Langflow Examples Catalog
 
-Ten katalog zawiera gotowe przykłady przepływów Langflow, które można zaimportować i używać bezpośrednio w środowisku Langflow + Open WebUI.
+This catalog contains ready-to-use Langflow workflow examples that can be imported and used directly in the Langflow + Open WebUI environment.
 
-## 🤖 Dostępne Przykłady AI
+## 🤖 Available AI Examples
 
 ### 1. **Gemini Pro Chat** (`gemini-chat-basic.json`)
-- **Model**: Google Gemini Pro (najnowsza wersja)
-- **Architektura**: Chat Input → Gemini → Chat Output
-- **Użycie**: Podstawowy chat z Google Gemini
+- **Model**: Google Gemini Pro (latest version)
+- **Architecture**: Chat Input → Gemini → Chat Output
+- **Usage**: Basic chat with Google Gemini
 - **Pipeline**: `gemini_chat_pipeline.py`
 
 ### 2. **GPT-4 Chat** (`gpt4-chat-basic.json`)
-- **Model**: OpenAI GPT-4 (najnowsza wersja)
-- **Architektura**: Chat Input → OpenAI GPT → Chat Output
-- **Użycie**: Podstawowy chat z GPT-4
+- **Model**: OpenAI GPT-4 (latest version)
+- **Architecture**: Chat Input → OpenAI GPT → Chat Output
+- **Usage**: Basic chat with GPT-4
 - **Pipeline**: `gpt4_chat_pipeline.py`
 
 ### 3. **Claude-3 Chat** (`claude3-chat-basic.json`)
-- **Model**: Anthropic Claude-3 (najnowsza wersja)
-- **Architektura**: Chat Input → Claude → Chat Output
-- **Użycie**: Podstawowy chat z Claude-3
+- **Model**: Anthropic Claude-3 (latest version)
+- **Architecture**: Chat Input → Claude → Chat Output
+- **Usage**: Basic chat with Claude-3
 - **Pipeline**: `claude_chat_pipeline.py`
 
-## 🚀 Jak Używać Przykładów
+## 🚀 How to Use Examples
 
-### Import do Langflow
-1. Uruchom środowisko: `./setup-openwebui.sh`
-2. Otwórz Langflow: http://localhost:7860
-3. Kliknij "Import" lub "Load Flow"
-4. Wybierz plik JSON z katalogu `flows/`
-5. Skonfiguruj klucze API dla wybranego modelu
-6. Zapisz i uruchom przepływ
+### Import to Langflow
+1. Start the environment: `./setup-openwebui.sh`
+2. Open Langflow: http://localhost:7860
+3. Click "Import" or "Load Flow"
+4. Select JSON file from `flows/` directory
+5. Configure API keys for your chosen model
+6. Save and run the workflow
 
-### Użycie w Open WebUI
-1. Skopiuj ID przepływu z Langflow
-2. W Open WebUI napisz: `@flow:your-flow-id Twoja wiadomość`
-3. Pipeline automatycznie przekieruje do odpowiedniego modelu AI
+### Usage in Open WebUI
+1. Copy the flow ID from Langflow
+2. In Open WebUI write: `@flow:your-flow-id Your message`
+3. Pipeline automatically routes to the appropriate AI model
 
-### Konfiguracja Pipeline
-1. Skopiuj odpowiedni plik pipeline z `pipelines/`
-2. Zaktualizuj `WORKFLOW_ID` w pliku pipeline
-3. Zrestartuj serwis pipelines: `docker-compose restart pipelines`
+### Pipeline Configuration
+1. Copy the appropriate pipeline file from `pipelines/`
+2. Update `WORKFLOW_ID` in the pipeline file
+3. Restart pipelines service: `docker-compose restart pipelines`
 
-## 🔧 Struktura Kataloga
+## 🔧 Catalog Structure
 
 ```
 catalog/
-├── README.md                          # Ten plik
-├── flows/                            # Pliki JSON do importu
-│   ├── gemini-chat-basic.json       # Przykład Gemini
-│   ├── gpt4-chat-basic.json         # Przykład GPT-4
-│   └── claude3-chat-basic.json      # Przykład Claude-3
-└── pipelines/                       # Skrypty integracyjne
-    ├── gemini_chat_pipeline.py      # Pipeline dla Gemini
-    ├── gpt4_chat_pipeline.py        # Pipeline dla GPT-4
-    └── claude_chat_pipeline.py      # Pipeline dla Claude
+├── README.md                          # This file
+├── flows/                            # JSON files for import
+│   ├── gemini-chat-basic.json       # Gemini example
+│   ├── gpt4-chat-basic.json         # GPT-4 example
+│   └── claude3-chat-basic.json      # Claude-3 example
+└── pipelines/                       # Integration scripts
+    ├── gemini_chat_pipeline.py      # Pipeline for Gemini
+    ├── gpt4_chat_pipeline.py        # Pipeline for GPT-4
+    └── claude_chat_pipeline.py      # Pipeline for Claude
 ```
 
-## 🔑 Wymagane Klucze API
+## 🔑 Required API Keys
 
-Aby używać przykładów, potrzebujesz kluczy API:
+To use the examples, you need API keys:
 
 - **Gemini**: Google AI Studio API Key
 - **GPT-4**: OpenAI API Key
 - **Claude-3**: Anthropic API Key
 
-Skonfiguruj je w zmiennych środowiskowych lub bezpośrednio w Langflow.
+Configure them in environment variables or directly in Langflow.
 
-## 💡 Wskazówki
+## 💡 Tips
 
-- **Każdy przykład** to kompletny, funkcjonalny przepływ
-- **Pojedyncze użycie AI** - jeden model na przepływ
-- **Najnowsze modele** - używamy najnowszych wersji każdego AI
-- **Proste integracje** - skupiamy się na podstawowym chat flow
+- **Each example** is a complete, functional workflow
+- **Single AI usage** - one model per workflow
+- **Latest models** - we use the newest versions of each AI
+- **Simple integrations** - focus on basic chat flow
 
-## 🛠️ Rozszerzanie
+## 🛠️ Extending
 
-Możesz łatwo rozszerzyć te przykłady:
-- Dodać preprocessing tekstu
-- Zintegrować z bazami danych
-- Dodać memory/historię konwersacji  
-- Połączyć z zewnętrznymi API
+You can easily extend these examples:
+- Add text preprocessing
+- Integrate with databases
+- Add memory/conversation history
+- Connect to external APIs
 
 ---
 
-*Więcej dokumentacji: [README główny](../README.md)*
+*More documentation: [Main README](../README.md)*

@@ -163,7 +163,7 @@
                 "required": false,
                 "show": true,
                 "type": "str",
-                "value": "Jesteś pomocnym asystentem AI. Odpowiadaj w języku polskim, chyba że użytkownik poprosi o inny język."
+                "value": "You are a helpful AI assistant. Respond in English unless the user requests a different language."
               },
               "temperature": {
                 "display_name": "Temperature",

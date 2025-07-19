@@ -1,154 +1,154 @@
-# 🚀 Szybkie Wdrożenie Przykładów AI
+# 🚀 Quick Start Guide for AI Examples
 
-Przewodnik krok po kroku do uruchomienia przykładów Gemini, GPT-4 i Claude-3 w środowisku Langflow + Open WebUI.
+Step-by-step guide to get Gemini, GPT-4, and Claude-3 examples running in the Langflow + Open WebUI environment.
 
-## 📋 Wymagania
+## 📋 Requirements
 
-- Docker i Docker Compose
-- Klucze API dla wybranych modeli:
+- Docker and Docker Compose
+- API keys for chosen models:
   - **Gemini**: Google AI Studio API Key
   - **GPT-4o**: OpenAI API Key  
   - **Claude-3.5**: Anthropic API Key
 
-## 🎯 Instalacja i Uruchomienie
+## 🎯 Installation and Setup
 
-### 1. Uruchom Środowisko
+### 1. Start Environment
 
 ```bash
-# Sklonuj repozytorium (jeśli nie masz jeszcze)
+# Clone repository (if you don't have it yet)
 git clone <repo-url>
 cd langflow-ui
 
-# Uruchom wszystkie serwisy
+# Start all services
 ./setup-openwebui.sh
 ```
 
-Poczekaj aż wszystkie serwisy będą gotowe. Sprawdź dostępność:
+Wait until all services are ready. Check availability:
 - 🌐 Open WebUI: http://localhost:3000
 - 🔧 Langflow: http://localhost:7860
 
-### 2. Zaimportuj Przykład do Langflow
+### 2. Import Example to Langflow
 
-**Opcja A: Import z pliku JSON**
-1. Otwórz http://localhost:7860
-2. Kliknij **"New Flow"** → **"Upload"**
-3. Wybierz plik z katalogu `catalog/flows/`:
-   - `gemini-chat-basic.json` - dla Gemini
-   - `gpt4-chat-basic.json` - dla GPT-4o
-   - `claude3-chat-basic.json` - dla Claude-3.5
+**Option A: Import from JSON file**
+1. Open http://localhost:7860
+2. Click **"New Flow"** → **"Upload"**
+3. Select file from `catalog/flows/` directory:
+   - `gemini-chat-basic.json` - for Gemini
+   - `gpt4-chat-basic.json` - for GPT-4o
+   - `claude3-chat-basic.json` - for Claude-3.5
 
-**Opcja B: Kopiowanie pipeline**
-1. Skopiuj odpowiedni pipeline z `catalog/pipelines/` do głównego katalogu `pipelines/`
-2. Zrestartuj serwis pipelines: `docker-compose restart pipelines`
+**Option B: Copy pipeline**
+1. Copy appropriate pipeline from `catalog/pipelines/` to main `pipelines/` directory
+2. Restart pipelines service: `docker-compose restart pipelines`
 
-### 3. Skonfiguruj Klucze API
+### 3. Configure API Keys
 
-Po zaimportowaniu przepływu w Langflow:
+After importing the workflow in Langflow:
 
-1. Kliknij na komponent AI (Gemini/GPT/Claude)
-2. W panelu po prawej znajdź pole **"API Key"**
-3. Wpisz swój klucz API
-4. Kliknij **"Save"** lub **Ctrl+S**
+1. Click on AI component (Gemini/GPT/Claude)
+2. In the right panel find **"API Key"** field
+3. Enter your API key
+4. Click **"Save"** or **Ctrl+S**
 
-### 4. Przetestuj Przepływ
+### 4. Test the Workflow
 
-**W Langflow:**
-1. Kliknij **"Playground"** w prawym dolnym rogu
-2. Napisz wiadomość testową, np. "Cześć, jak się masz?"
-3. Kliknij **"Run"** i sprawdź czy otrzymujesz odpowiedź
+**In Langflow:**
+1. Click **"Playground"** in the bottom right corner
+2. Write a test message, e.g. "Hello, how are you?"
+3. Click **"Run"** and check if you receive a response
 
-**W Open WebUI:**
-1. Otwórz http://localhost:3000
-2. Napisz: `@flow:nazwa-endpoint-u Twoja wiadomość`
-   - Przykład: `@flow:gemini-chat-basic Opowiedz mi o AI`
+**In Open WebUI:**
+1. Open http://localhost:3000
+2. Write: `@flow:your-endpoint-name Your message`
+   - Example: `@flow:gemini-chat-basic Tell me about AI`
 
-## 🔧 Dostosowywanie
+## 🔧 Customization
 
-### Zmiana Modelu AI
+### Changing AI Model
 
 **Gemini:**
-- `gemini-pro` - podstawowy model
-- `gemini-1.5-pro-latest` - najnowszy (domyślny)
-- `gemini-1.5-flash-latest` - szybszy model
+- `gemini-pro` - basic model
+- `gemini-1.5-pro-latest` - newest (default)
+- `gemini-1.5-flash-latest` - faster model
 
 **GPT-4o:**
-- `gpt-4o` - najnowszy (domyślny)
-- `gpt-4-turbo` - alternatywa
-- `gpt-4o-mini` - tańsza wersja
+- `gpt-4o` - newest (default)
+- `gpt-4-turbo` - alternative
+- `gpt-4o-mini` - cheaper version
 
 **Claude-3.5:**
-- `claude-3-5-sonnet-20240620` - najnowszy (domyślny)
-- `claude-3-opus-20240229` - najinteligentniejszy
-- `claude-3-haiku-20240307` - najszybszy
+- `claude-3-5-sonnet-20240620` - newest (default)
+- `claude-3-opus-20240229` - most intelligent
+- `claude-3-haiku-20240307` - fastest
 
-### Dostosowanie System Message
+### Customizing System Message
 
-W każdym przepływie można zmienić wiadomość systemową:
-1. Kliknij na komponent AI
-2. Znajdź pole **"System Message"**
-3. Zmień na swoją instrukcję, np.:
+In each workflow you can change the system message:
+1. Click on AI component
+2. Find **"System Message"** field
+3. Change to your instruction, e.g.:
    ```
-   Jesteś ekspertem od programowania. 
-   Odpowiadaj konkretnie z przykładami kodu.
+   You are a programming expert. 
+   Answer specifically with code examples.
    ```
 
-### Zmiana Parametrów
+### Changing Parameters
 
 **Temperature (0.0-1.0):**
-- `0.1` - bardzo konserwatywne odpowiedzi
-- `0.7` - bardziej kreatywne (domyślne)
-- `1.0` - bardzo kreatywne
+- `0.1` - very conservative responses
+- `0.7` - more creative (default)
+- `1.0` - very creative
 
 **Max Tokens:**
-- `512` - krótkie odpowiedzi
-- `1024` - średnie odpowiedzi (domyślne)
-- `2048` - długie odpowiedzi
+- `512` - short responses
+- `1024` - medium responses (default)
+- `2048` - long responses
 
-## 🐛 Rozwiązywanie Problemów
+## 🐛 Troubleshooting
 
-### Błąd "API Key not found"
-1. Sprawdź czy wprowadziłeś poprawny klucz API
-2. Sprawdź czy klucz ma odpowiednie uprawnienia
-3. Upewnij się, że zapisałeś przepływ po wprowadzeniu klucza
+### Error: "API Key not found"
+1. Check if you entered the correct API key
+2. Check if the key has proper permissions
+3. Make sure you saved the workflow after entering the key
 
-### Błąd "Connection Error"
-1. Sprawdź czy wszystkie serwisy działają: `docker-compose ps`
-2. Sprawdź logi: `docker-compose logs langflow`
-3. Zrestartuj serwisy: `docker-compose restart`
+### Error: "Connection Error"
+1. Check if all services are running: `docker-compose ps`
+2. Check logs: `docker-compose logs langflow`
+3. Restart services: `docker-compose restart`
 
-### Brak odpowiedzi z modelu
-1. Sprawdź logi Langflow: `docker-compose logs -f langflow`
-2. Przetestuj bezpośrednio w Langflow Playground
-3. Sprawdź czy model jest dostępny w danym regionie
+### No response from model
+1. Check Langflow logs: `docker-compose logs -f langflow`
+2. Test directly in Langflow Playground
+3. Check if model is available in your region
 
-### Pipeline nie działa w Open WebUI
-1. Sprawdź czy pipeline jest w katalogu `pipelines/`
-2. Zrestartuj pipelines: `docker-compose restart pipelines`
-3. Sprawdź logi: `docker-compose logs -f pipelines`
+### Pipeline not working in Open WebUI
+1. Check if pipeline is in `pipelines/` directory
+2. Restart pipelines: `docker-compose restart pipelines`
+3. Check logs: `docker-compose logs -f pipelines`
 
-## 💡 Wskazówki Pro
+## 💡 Pro Tips
 
-1. **Kopiuj ID przepływu** z Langflow URL po zapisaniu
-2. **Używaj różnych endpoint_name** dla różnych wersji
-3. **Testuj zawsze w Playground** przed użyciem w Open WebUI
-4. **Monitoruj logi** podczas pierwszego uruchomienia
-5. **Używaj Docker volumes** do zachowania danych
+1. **Copy flow ID** from Langflow URL after saving
+2. **Use different endpoint_name** for different versions
+3. **Always test in Playground** before using in Open WebUI
+4. **Monitor logs** during first run
+5. **Use Docker volumes** to preserve data
 
-## 🔄 Aktualizacje
+## 🔄 Updates
 
-Aby zaktualizować obrazy Docker:
+To update Docker images:
 ```bash
 docker-compose pull
 docker-compose up -d
 ```
 
-## 📞 Pomoc
+## 📞 Help
 
-- **Logi serwisów**: `docker-compose logs -f [service-name]`
-- **Status serwisów**: `docker-compose ps`
-- **Restart wszystkich**: `docker-compose restart`
-- **Reset danych**: `./setup-openwebui.sh --clean`
+- **Service logs**: `docker-compose logs -f [service-name]`
+- **Service status**: `docker-compose ps`
+- **Restart all**: `docker-compose restart`
+- **Reset data**: `./setup-openwebui.sh --clean`
 
 ---
 
-**Potrzebujesz pomocy?** Sprawdź główny [README.md](../../README.md) lub logi serwisów.
+**Need help?** Check the main [README.md](../../README.md) or service logs.
