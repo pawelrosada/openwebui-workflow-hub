@@ -1,0 +1,32 @@
+# .pre-commit-config.yaml - Basic config for pre-commit (English only; validates py/json/sh per standards, includes Trivy; auto-fixes where possible).
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0  # Latest
+    hooks:
+      - id: check-json  # Validates JSON
+      - id: pretty-format-json  # Auto-fixes JSON (per standards)
+        args: ['--autofix']
+      - id: check-yaml  # Validates YAML
+      - id: trailing-whitespace  # Remove trailing whitespace
+      - id: end-of-file-fixer  # Ensure files end with newline
+      - id: check-added-large-files  # Prevent large files
+        args: ['--maxkb=500']
+      - id: check-merge-conflict  # Check for merge conflict markers
+
+  - repo: https://github.com/psf/black
+    rev: 24.4.2  # Latest
+    hooks:
+      - id: black  # Auto-formats Python per PEP 8
+        language_version: python3
+
+  - repo: https://github.com/PyCQA/flake8
+    rev: 7.1.0  # Latest
+    hooks:
+      - id: flake8  # Lints Python per PEP 8
+        args: ['--max-line-length=88', '--extend-ignore=E203,W503']
+
+  - repo: https://github.com/shellcheck-py/shellcheck-py
+    rev: v0.10.0.1  # Latest
+    hooks:
+      - id: shellcheck  # Validates shell scripts per standards
+        args: ['-e', 'SC2034']  # Allow unused variables

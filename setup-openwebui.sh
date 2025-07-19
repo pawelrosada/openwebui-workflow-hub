@@ -68,7 +68,7 @@ sleep 10
 
 # Check service health
 check_service() {
-    local service=$1
+    # local service=$1  # Service name (unused but kept for clarity)
     local url=$2
     local name=$3
     

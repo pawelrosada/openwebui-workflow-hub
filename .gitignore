@@ -204,3 +204,9 @@ __pycache__/
 test_env/
 venv/
 env/
+
+# Pre-commit cache
+.pre-commit-cache/
+
+# Trivy cache
+.trivycache/
