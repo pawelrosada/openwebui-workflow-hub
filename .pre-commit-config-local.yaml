@@ -1,0 +1,50 @@
+# .pre-commit-config-local.yaml - Simplified config using local tools only
+repos:
+  - repo: local
+    hooks:
+      - id: black
+        name: Black Python formatter
+        entry: black
+        language: system
+        types: [python]
+        
+      - id: flake8
+        name: Flake8 Python linter  
+        entry: flake8
+        language: system
+        types: [python]
+        args: ['--max-line-length=88', '--extend-ignore=E203,W503,F401,F541,E501']
+        
+      - id: shellcheck
+        name: Shellcheck shell validator
+        entry: shellcheck
+        language: system
+        types: [shell]
+        args: ['-e', 'SC2034']
+        
+      - id: check-json
+        name: Check JSON syntax
+        entry: sh
+        language: system
+        files: '\.json$'
+        args:
+          - -c
+          - |
+            for file in "$@"; do
+              echo "Validating JSON: $file"
+              python -m json.tool "$file" > /dev/null || exit 1
+            done
+        
+      - id: trivy-scan
+        name: Trivy security scan
+        entry: sh
+        language: system
+        pass_filenames: false
+        args:
+          - -c
+          - |
+            if command -v trivy >/dev/null 2>&1; then
+              trivy fs --security-checks vuln,secret,config --severity HIGH,CRITICAL --exit-code 0 .
+            else
+              echo "Trivy not found, skipping security scan"
+            fi

@@ -1,5 +1,7 @@
 # Langflow + Open WebUI Integration
 
+[![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen)](https://github.com/pre-commit/pre-commit) [![Trivy](https://img.shields.io/badge/Trivy-Enabled-blue)](https://aquasecurity.github.io/trivy/) [![GitHub Actions](https://github.com/pawelrosada/langflow-ui/workflows/Pre-Commit%20CI/badge.svg)](https://github.com/pawelrosada/langflow-ui/actions) [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black) [![security: bandit](https://img.shields.io/badge/security-bandit-yellow.svg)](https://github.com/PyCQA/bandit)
+
 Simple integration setup that connects Open WebUI with Langflow for AI workflow management with dynamic workflow selection capabilities.
 
 ## 🚀 Features
@@ -219,6 +221,41 @@ The setup script automatically creates a `.env.openwebui` file with secure defau
 - **WORKFLOW_ID**: Default Langflow workflow ID
 - **POSTGRES_***: Database configuration
 - **WEBUI_***: Open WebUI settings
+
+## 🛡️ Code Quality & Security
+
+This project uses automated code quality and security tools:
+
+### Pre-commit Hooks
+```bash
+# Install pre-commit hooks
+./setup-pre-commit.sh
+
+# Or manually:
+pip install pre-commit
+pre-commit install
+pre-commit run --all-files
+```
+
+**Tools included:**
+- **Black** - Python code formatting (auto-fix)
+- **Flake8** - Python linting per PEP 8
+- **Trivy** - Security vulnerability scanning
+- **Shellcheck** - Shell script validation
+- **JSON/YAML validators** - Format validation
+
+### GitHub Actions
+Every pull request automatically runs:
+- Pre-commit validation
+- Security scanning with Trivy  
+- Code formatting checks
+- Auto-fixing where possible
+
+### Security Features
+- 🔒 **Trivy scanning** for vulnerabilities and secrets
+- 🎯 **Automated validation** on every commit and PR
+- ✨ **Auto-fixing** for formatting issues
+- 📊 **Status badges** showing code quality
 
 ## 🔌 Pipeline Integration
 

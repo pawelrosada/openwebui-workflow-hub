@@ -5,7 +5,7 @@ Creates LangFlow workflows that can dynamically handle multiple AI models.
 
 Generates JSON workflows for:
 1. Universal Multi-Model Chat - Single workflow that can switch between models
-2. Agentic Multi-Model Flow - Workflow that routes based on input type  
+2. Agentic Multi-Model Flow - Workflow that routes based on input type
 3. RAG Multi-Model Pipeline - Retrieval-Augmented Generation with model selection
 
 These workflows are UI-friendly and can be imported into LangFlow for visual editing.
@@ -15,23 +15,22 @@ import json
 import os
 from typing import Dict, Any, List
 
+
 def create_base_universal_workflow() -> Dict[str, Any]:
     """Create base structure for universal workflows"""
     return {
-        "data": {
-            "nodes": [],
-            "edges": []
-        },
+        "data": {"nodes": [], "edges": []},
         "description": "",
         "name": "",
-        "last_tested_version": "1.0.0"
+        "last_tested_version": "1.0.0",
     }
+
 
 def create_model_selector_node() -> Dict[str, Any]:
     """Create a model selector component node"""
     return {
         "id": "ModelSelector-1",
-        "type": "DropdownInput", 
+        "type": "DropdownInput",
         "position": {"x": 200, "y": 100},
         "data": {
             "type": "DropdownInput",
@@ -49,7 +48,7 @@ def create_model_selector_node() -> Dict[str, Any]:
                         "type": "str",
                         "info": "Choose AI model for this conversation",
                         "list": False,
-                        "options": ["gemini", "gpt", "claude"]
+                        "options": ["gemini", "gpt", "claude"],
                     }
                 },
                 "description": "Dropdown to select AI model dynamically.",
@@ -57,10 +56,11 @@ def create_model_selector_node() -> Dict[str, Any]:
                 "display_name": "Model Selector",
                 "documentation": "",
                 "custom_fields": {},
-                "output_types": ["str"]
-            }
-        }
+                "output_types": ["str"],
+            },
+        },
     }
+
 
 def create_conditional_router_node() -> Dict[str, Any]:
     """Create a conditional router that selects model based on input"""
@@ -69,7 +69,7 @@ def create_conditional_router_node() -> Dict[str, Any]:
         "type": "ConditionalRouter",
         "position": {"x": 400, "y": 200},
         "data": {
-            "type": "ConditionalRouter", 
+            "type": "ConditionalRouter",
             "node": {
                 "template": {
                     "input_text": {
@@ -84,7 +84,7 @@ def create_conditional_router_node() -> Dict[str, Any]:
                         "display_name": "Input Text",
                         "type": "str",
                         "info": "Text to analyze for model routing",
-                        "list": False
+                        "list": False,
                     },
                     "routing_logic": {
                         "required": True,
@@ -105,46 +105,49 @@ else:
                         "display_name": "Routing Logic",
                         "type": "code",
                         "info": "Python code to determine model selection",
-                        "list": False
-                    }
+                        "list": False,
+                    },
                 },
                 "description": "Routes input to appropriate model based on content analysis.",
                 "base_classes": ["str"],
                 "display_name": "Conditional Router",
                 "documentation": "",
                 "custom_fields": {},
-                "output_types": ["str"]
-            }
-        }
+                "output_types": ["str"],
+            },
+        },
     }
 
-def create_multi_model_node(model_name: str, position: Dict[str, int]) -> Dict[str, Any]:
+
+def create_multi_model_node(
+    model_name: str, position: Dict[str, int]
+) -> Dict[str, Any]:
     """Create a conditional model node that activates based on selection"""
-    
+
     model_configs = {
         "gemini": {
             "type": "GoogleAI",
             "model": "gemini-2.5-flash",
             "api_key_field": "google_api_key",
-            "display_name": "Google Gemini"
+            "display_name": "Google Gemini",
         },
         "gpt": {
             "type": "OpenAI",
             "model": "gpt-4o",
-            "api_key_field": "openai_api_key", 
-            "display_name": "OpenAI GPT"
+            "api_key_field": "openai_api_key",
+            "display_name": "OpenAI GPT",
         },
         "claude": {
             "type": "Anthropic",
             "model": "claude-3-5-sonnet-20241022",
             "api_key_field": "anthropic_api_key",
-            "display_name": "Anthropic Claude"
-        }
+            "display_name": "Anthropic Claude",
+        },
     }
-    
+
     config = model_configs[model_name]
     node_id = f"{config['type']}-Multi-{model_name.capitalize()}-1"
-    
+
     return {
         "id": node_id,
         "type": config["type"],
@@ -164,7 +167,7 @@ def create_multi_model_node(model_name: str, position: Dict[str, int]) -> Dict[s
                         "display_name": f"{config['display_name']} API Key",
                         "type": "str",
                         "info": f"Enter your {config['display_name']} API key",
-                        "list": False
+                        "list": False,
                     },
                     "model": {
                         "required": True,
@@ -177,7 +180,7 @@ def create_multi_model_node(model_name: str, position: Dict[str, int]) -> Dict[s
                         "display_name": "Model",
                         "type": "str",
                         "info": f"{config['display_name']} model to use",
-                        "list": False
+                        "list": False,
                     },
                     "temperature": {
                         "required": False,
@@ -190,7 +193,7 @@ def create_multi_model_node(model_name: str, position: Dict[str, int]) -> Dict[s
                         "display_name": "Temperature",
                         "type": "float",
                         "info": "Controls randomness in responses",
-                        "list": False
+                        "list": False,
                     },
                     "input_value": {
                         "dynamic": True,
@@ -204,7 +207,7 @@ def create_multi_model_node(model_name: str, position: Dict[str, int]) -> Dict[s
                         "display_name": "Input",
                         "type": "str",
                         "info": "",
-                        "list": False
+                        "list": False,
                     },
                     "active_condition": {
                         "required": False,
@@ -217,18 +220,19 @@ def create_multi_model_node(model_name: str, position: Dict[str, int]) -> Dict[s
                         "display_name": "Activation Condition",
                         "type": "str",
                         "info": f"Condition to activate {config['display_name']}",
-                        "list": False
-                    }
+                        "list": False,
+                    },
                 },
                 "description": f"{config['display_name']} node with conditional activation.",
                 "base_classes": ["BaseLanguageModel", "LanguageModel"],
                 "display_name": f"{config['display_name']} (Multi)",
                 "documentation": "",
                 "custom_fields": {},
-                "output_types": ["Message"]
-            }
-        }
+                "output_types": ["Message"],
+            },
+        },
     }
+
 
 def create_output_merger_node() -> Dict[str, Any]:
     """Create node that merges outputs from multiple models"""
@@ -252,7 +256,7 @@ def create_output_merger_node() -> Dict[str, Any]:
                         "display_name": "Gemini Output",
                         "type": "str",
                         "info": "Output from Gemini model",
-                        "list": False
+                        "list": False,
                     },
                     "gpt_output": {
                         "dynamic": True,
@@ -263,10 +267,10 @@ def create_output_merger_node() -> Dict[str, Any]:
                         "value": "",
                         "password": False,
                         "name": "gpt_output",
-                        "display_name": "GPT Output", 
+                        "display_name": "GPT Output",
                         "type": "str",
                         "info": "Output from GPT model",
-                        "list": False
+                        "list": False,
                     },
                     "claude_output": {
                         "dynamic": True,
@@ -280,26 +284,29 @@ def create_output_merger_node() -> Dict[str, Any]:
                         "display_name": "Claude Output",
                         "type": "str",
                         "info": "Output from Claude model",
-                        "list": False
-                    }
+                        "list": False,
+                    },
                 },
                 "description": "Merges outputs from multiple models into single response.",
                 "base_classes": ["Message"],
                 "display_name": "Output Merger",
                 "documentation": "",
                 "custom_fields": {},
-                "output_types": ["Message"]
-            }
-        }
+                "output_types": ["Message"],
+            },
+        },
     }
+
 
 def generate_universal_multi_model_workflow() -> Dict[str, Any]:
     """Generate universal workflow that can handle multiple models"""
-    
+
     workflow = create_base_universal_workflow()
     workflow["name"] = "Universal Multi-Model Chat"
-    workflow["description"] = "Universal chat workflow with dynamic model selection. Choose between Gemini, GPT-4o, and Claude in a single flow. Perfect for testing different models with the same input."
-    
+    workflow["description"] = (
+        "Universal chat workflow with dynamic model selection. Choose between Gemini, GPT-4o, and Claude in a single flow. Perfect for testing different models with the same input."
+    )
+
     # Add nodes
     workflow["data"]["nodes"] = [
         {
@@ -322,7 +329,7 @@ def generate_universal_multi_model_workflow() -> Dict[str, Any]:
                             "display_name": "Chat Input",
                             "type": "str",
                             "info": "",
-                            "list": False
+                            "list": False,
                         }
                     },
                     "description": "A chat input component for user messages.",
@@ -330,9 +337,9 @@ def generate_universal_multi_model_workflow() -> Dict[str, Any]:
                     "display_name": "Chat Input",
                     "documentation": "",
                     "custom_fields": {},
-                    "output_types": ["Message"]
-                }
-            }
+                    "output_types": ["Message"],
+                },
+            },
         },
         create_model_selector_node(),
         create_multi_model_node("gemini", {"x": 500, "y": 100}),
@@ -359,7 +366,7 @@ def generate_universal_multi_model_workflow() -> Dict[str, Any]:
                             "display_name": "Text",
                             "type": "str",
                             "info": "",
-                            "list": False
+                            "list": False,
                         }
                     },
                     "description": "A chat output component for AI responses.",
@@ -367,53 +374,56 @@ def generate_universal_multi_model_workflow() -> Dict[str, Any]:
                     "display_name": "Chat Output",
                     "documentation": "",
                     "custom_fields": {},
-                    "output_types": ["Message"]
-                }
-            }
-        }
+                    "output_types": ["Message"],
+                },
+            },
+        },
     ]
-    
+
     # Create edges - simplified for demo
     workflow["data"]["edges"] = [
         {
             "source": "ChatInput-1",
             "target": "GoogleAI-Multi-Gemini-1",
             "data": {"connection": "input_to_gemini"},
-            "id": "edge-input-gemini"
+            "id": "edge-input-gemini",
         },
         {
-            "source": "ChatInput-1", 
+            "source": "ChatInput-1",
             "target": "OpenAI-Multi-Gpt-1",
             "data": {"connection": "input_to_gpt"},
-            "id": "edge-input-gpt"
+            "id": "edge-input-gpt",
         },
         {
             "source": "ChatInput-1",
             "target": "Anthropic-Multi-Claude-1",
             "data": {"connection": "input_to_claude"},
-            "id": "edge-input-claude"
+            "id": "edge-input-claude",
         },
         {
             "source": "OutputMerger-1",
             "target": "ChatOutput-1",
             "data": {"connection": "merger_to_output"},
-            "id": "edge-merger-output"
-        }
+            "id": "edge-merger-output",
+        },
     ]
-    
+
     return workflow
+
 
 def generate_agentic_workflow() -> Dict[str, Any]:
     """Generate agentic workflow with automatic model routing"""
-    
+
     workflow = create_base_universal_workflow()
     workflow["name"] = "Agentic Multi-Model Router"
-    workflow["description"] = "Smart agentic workflow that automatically routes queries to the most suitable AI model based on content analysis. Coding questions → Claude, Creative tasks → GPT-4o, Search queries → Gemini."
-    
+    workflow["description"] = (
+        "Smart agentic workflow that automatically routes queries to the most suitable AI model based on content analysis. Coding questions → Claude, Creative tasks → GPT-4o, Search queries → Gemini."
+    )
+
     workflow["data"]["nodes"] = [
         {
             "id": "ChatInput-1",
-            "type": "ChatInput", 
+            "type": "ChatInput",
             "position": {"x": 100, "y": 200},
             "data": {
                 "type": "ChatInput",
@@ -431,7 +441,7 @@ def generate_agentic_workflow() -> Dict[str, Any]:
                             "display_name": "Chat Input",
                             "type": "str",
                             "info": "Type your question - will be automatically routed to best model",
-                            "list": False
+                            "list": False,
                         }
                     },
                     "description": "Smart chat input with automatic model routing.",
@@ -439,9 +449,9 @@ def generate_agentic_workflow() -> Dict[str, Any]:
                     "display_name": "Smart Chat Input",
                     "documentation": "",
                     "custom_fields": {},
-                    "output_types": ["Message"]
-                }
-            }
+                    "output_types": ["Message"],
+                },
+            },
         },
         create_conditional_router_node(),
         create_multi_model_node("gemini", {"x": 600, "y": 100}),
@@ -468,7 +478,7 @@ def generate_agentic_workflow() -> Dict[str, Any]:
                             "display_name": "Smart Response",
                             "type": "str",
                             "info": "Response from automatically selected model",
-                            "list": False
+                            "list": False,
                         }
                     },
                     "description": "Output showing which model was selected and the response.",
@@ -476,66 +486,73 @@ def generate_agentic_workflow() -> Dict[str, Any]:
                     "display_name": "Smart Chat Output",
                     "documentation": "",
                     "custom_fields": {},
-                    "output_types": ["Message"]
-                }
-            }
-        }
+                    "output_types": ["Message"],
+                },
+            },
+        },
     ]
-    
+
     workflow["data"]["edges"] = [
         {
             "source": "ChatInput-1",
-            "target": "ConditionalRouter-1", 
+            "target": "ConditionalRouter-1",
             "data": {"connection": "input_to_router"},
-            "id": "edge-input-router"
+            "id": "edge-input-router",
         },
         {
             "source": "ConditionalRouter-1",
             "target": "OutputMerger-1",
             "data": {"connection": "router_to_merger"},
-            "id": "edge-router-merger"
+            "id": "edge-router-merger",
         },
         {
             "source": "OutputMerger-1",
             "target": "ChatOutput-1",
             "data": {"connection": "merger_to_output"},
-            "id": "edge-merger-output"
-        }
+            "id": "edge-merger-output",
+        },
     ]
-    
+
     return workflow
 
-def save_workflow(workflow: Dict[str, Any], filename: str, output_dir: str = "examples/langflow-workflows"):
+
+def save_workflow(
+    workflow: Dict[str, Any],
+    filename: str,
+    output_dir: str = "examples/langflow-workflows",
+):
     """Save workflow to file"""
-    
+
     os.makedirs(output_dir, exist_ok=True)
     filepath = os.path.join(output_dir, filename)
-    
-    with open(filepath, 'w', encoding='utf-8') as f:
+
+    with open(filepath, "w", encoding="utf-8") as f:
         json.dump(workflow, f, indent=2, ensure_ascii=False)
-    
+
     print(f"Generated universal workflow: {filepath}")
+
 
 def main():
     """Generate all universal workflow templates"""
-    
+
     print("🔧 Generating universal multi-model LangFlow workflows...")
-    
+
     # Generate workflows
     workflows = [
         (generate_universal_multi_model_workflow(), "universal-multi-model-chat.json"),
-        (generate_agentic_workflow(), "agentic-multi-model-router.json")
+        (generate_agentic_workflow(), "agentic-multi-model-router.json"),
     ]
-    
+
     for workflow, filename in workflows:
         save_workflow(workflow, filename)
-    
+
     print(f"\\n✅ Generated {len(workflows)} universal workflow templates")
     print("\\n📁 Files created:")
-    print("   • universal-multi-model-chat.json - Manual model selection")  
+    print("   • universal-multi-model-chat.json - Manual model selection")
     print("   • agentic-multi-model-router.json - Automatic model routing")
     print("\\n🚀 Import these into LangFlow for visual editing!")
     print("📖 Each workflow supports dynamic model switching in a single flow")
+
 
 if __name__ == "__main__":
     main()

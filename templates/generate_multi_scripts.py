@@ -8,12 +8,12 @@ This approach provides better isolation and scalability for production deploymen
 
 Usage:
     python generate_multi_scripts.py
-    
+
     # This will generate:
     # - gemini_api.py (runs on port 8001)
-    # - gpt_api.py (runs on port 8002) 
+    # - gpt_api.py (runs on port 8002)
     # - claude_api.py (runs on port 8003)
-    
+
     # Then run each script:
     # python gemini_api.py &
     # python gpt_api.py &
@@ -23,12 +23,13 @@ Usage:
 import os
 from typing import Dict
 
+
 def generate_model_api_script(model_name: str, model_config: Dict, port: int) -> str:
     """Generate individual API script for a specific model"""
-    
+
     api_key_env = f"{model_name.upper()}_API_KEY"
     api_key_placeholder = f"<YOUR_{model_name.upper()}_API_KEY>"
-    
+
     return f'''#!/usr/bin/env python3
 """
 {model_config["display_name"]} API - Individual Model Server
@@ -203,9 +204,10 @@ if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port={port})
 '''
 
+
 def generate_orchestrator_script() -> str:
     """Generate orchestrator script to manage all model APIs"""
-    
+
     return '''#!/usr/bin/env python3
 """
 Multi-Model API Orchestrator
@@ -344,50 +346,47 @@ if __name__ == "__main__":
     main()
 '''
 
+
 def main():
     """Generate all multi-script files"""
-    
+
     # Model configurations
     models = {
         "gemini": {
             "model": "gemini-2.5-flash",
             "display_name": "Google Gemini 2.5 Flash",
-            "port": 8001
+            "port": 8001,
         },
-        "gpt": {
-            "model": "gpt-4o",
-            "display_name": "OpenAI GPT-4o", 
-            "port": 8002
-        },
+        "gpt": {"model": "gpt-4o", "display_name": "OpenAI GPT-4o", "port": 8002},
         "claude": {
             "model": "claude-3-5-sonnet-20241022",
             "display_name": "Anthropic Claude 3.5 Sonnet",
-            "port": 8003
-        }
+            "port": 8003,
+        },
     }
-    
+
     print("🔧 Generating multi-script API files...")
-    
+
     # Generate individual model scripts
     for model_name, config in models.items():
         script_content = generate_model_api_script(model_name, config, config["port"])
         filename = f"{model_name}_api.py"
-        
-        with open(filename, 'w', encoding='utf-8') as f:
+
+        with open(filename, "w", encoding="utf-8") as f:
             f.write(script_content)
-        
+
         # Make executable
         os.chmod(filename, 0o755)
         print(f"   ✅ Generated {filename}")
-    
+
     # Generate orchestrator script
     orchestrator_content = generate_orchestrator_script()
-    with open("orchestrator.py", 'w', encoding='utf-8') as f:
+    with open("orchestrator.py", "w", encoding="utf-8") as f:
         f.write(orchestrator_content)
-    
+
     os.chmod("orchestrator.py", 0o755)
     print(f"   ✅ Generated orchestrator.py")
-    
+
     print(f"\\n🚀 Generated {len(models)} individual API scripts + orchestrator")
     print("\\nUsage:")
     print("   # Option 1: Use orchestrator (recommended)")
@@ -395,8 +394,11 @@ def main():
     print("   ")
     print("   # Option 2: Run individual scripts")
     for model_name, config in models.items():
-        print(f"   {model_name.upper()}_API_KEY='your-key' python {model_name}_api.py &")
+        print(
+            f"   {model_name.upper()}_API_KEY='your-key' python {model_name}_api.py &"
+        )
     print("\\n📚 Each API provides OpenAPI docs at http://localhost:[port]/docs")
+
 
 if __name__ == "__main__":
     main()

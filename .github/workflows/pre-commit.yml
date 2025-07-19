@@ -1,0 +1,82 @@
+# .github/workflows/pre-commit.yml - Basic GitHub Action to run pre-commit on PRs (English only; ensures green status and fixes).
+name: Pre-Commit CI
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+  push:
+    branches: [main, develop]
+
+jobs:
+  pre-commit:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Cache pre-commit hooks
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pre-commit
+          key: pre-commit-${{ hashFiles('.pre-commit-config.yaml') }}
+
+      - name: Install pre-commit
+        run: |
+          pip install pre-commit
+          pre-commit --version
+
+      - name: Install system dependencies
+        run: |
+          # Install Trivy
+          sudo apt-get update
+          sudo apt-get install -y wget apt-transport-https gnupg lsb-release
+          wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
+          echo "deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" | sudo tee -a /etc/apt/sources.list.d/trivy.list
+          sudo apt-get update
+          sudo apt-get install -y trivy
+          
+          # Verify installations
+          trivy --version
+          shellcheck --version
+
+      - name: Run pre-commit hooks
+        run: |
+          pre-commit install
+          pre-commit run --all-files --show-diff-on-failure
+
+      - name: Auto-fix and commit changes
+        if: failure()
+        run: |
+          # Configure git
+          git config --local user.email "action@github.com"
+          git config --local user.name "Pre-commit Auto-fix"
+          
+          # Check if there are changes to commit
+          if ! git diff --quiet; then
+            echo "Auto-fixing formatting issues..."
+            git add -A
+            git commit -m "Auto-fix: Apply pre-commit formatting [skip ci]" || true
+            
+            # Only push if this is a PR from a fork or if we have permission
+            if [ "${{ github.event_name }}" = "pull_request" ] && [ "${{ github.event.pull_request.head.repo.full_name }}" = "${{ github.repository }}" ]; then
+              git push
+            else
+              echo "Skipping auto-push - either not a PR or from a fork"
+              echo "Please run 'pre-commit run --all-files' locally and commit the changes"
+            fi
+          else
+            echo "No formatting changes needed"
+          fi
+
+      - name: Final validation
+        run: |
+          echo "Running final validation..."
+          pre-commit run --all-files
