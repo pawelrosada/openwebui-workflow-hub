@@ -190,3 +190,12 @@ yarn.lock
 # Generated files
 src/frontend/dist/
 src/backend/dist/
+
+# Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Environment files with generated secrets
+.env.openwebui
