@@ -1,0 +1,45 @@
+1. Get the application URL by running these commands:
+{{- if .Values.ingress.enabled }}
+{{- range $host := .Values.ingress.hosts }}
+  {{- range .paths }}
+  http{{ if $.Values.ingress.tls }}s{{ end }}://{{ $host.host }}{{ .path }}
+  {{- end }}
+{{- end }}
+{{- else if contains "NodePort" .Values.service.type }}
+  export NODE_PORT=$(kubectl get --namespace {{ .Release.Namespace }} -o jsonpath="{.spec.ports[0].nodePort}" services {{ include "langflow-app.fullname" . }})
+  export NODE_IP=$(kubectl get nodes --namespace {{ .Release.Namespace }} -o jsonpath="{.items[0].status.addresses[0].address}")
+  echo http://$NODE_IP:$NODE_PORT
+{{- else if contains "LoadBalancer" .Values.service.type }}
+     NOTE: It may take a few minutes for the LoadBalancer IP to be available.
+           You can watch the status of by running 'kubectl get --namespace {{ .Release.Namespace }} svc -w {{ include "langflow-app.fullname" . }}'
+  export SERVICE_IP=$(kubectl get svc --namespace {{ .Release.Namespace }} {{ include "langflow-app.fullname" . }} --template "{{"{{ range (index .status.loadBalancer.ingress 0) }}{{.}}{{ end }}"}}")
+  echo http://$SERVICE_IP:{{ .Values.service.port }}
+{{- else if contains "ClusterIP" .Values.service.type }}
+  export POD_NAME=$(kubectl get pods --namespace {{ .Release.Namespace }} -l "app.kubernetes.io/name={{ include "langflow-app.name" . }},app.kubernetes.io/instance={{ .Release.Name }}" -o jsonpath="{.items[0].metadata.name}")
+  export CONTAINER_PORT=$(kubectl get pod --namespace {{ .Release.Namespace }} $POD_NAME -o jsonpath="{.spec.containers[0].ports[0].containerPort}")
+  echo "Visit http://127.0.0.1:7860 to use your application"
+  kubectl --namespace {{ .Release.Namespace }} port-forward $POD_NAME 7860:$CONTAINER_PORT
+{{- end }}
+
+2. LangFlow is now deployed with:
+   - Dedicated PostgreSQL database: {{ .Values.postgresql.auth.database }}
+   - Database user: {{ .Values.postgresql.auth.username }}
+{{- if .Values.mcp.enabled }}
+   - MCP servers: {{ .Values.mcp.replicas }} replicas
+   - MCP service: {{ include "langflow-app.fullname" . }}-mcp
+{{- end }}
+{{- if .Values.openwebui.enabled }}
+   - OpenWebUI interface available at port {{ .Values.openwebui.service.port }}
+{{- end }}
+
+3. Default credentials:
+   - LangFlow admin: {{ .Values.config.langflowSuperuser }} / {{ .Values.config.langflowSuperuserPassword }}
+
+4. To scale MCP servers:
+   helm upgrade {{ .Release.Name }} ./helm --set mcp.replicas=3
+
+5. To access logs:
+   kubectl logs -f deployment/{{ include "langflow-app.fullname" . }} -n {{ .Release.Namespace }}
+
+6. To check all services:
+   kubectl get all -l app.kubernetes.io/instance={{ .Release.Name }} -n {{ .Release.Namespace }}
