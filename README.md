@@ -130,10 +130,12 @@ Visual AI workflow builder with:
 
 ### 🗄️ **PostgreSQL Database**
 Persistent storage for:
-- LangFlow workflow configurations
-- Chat conversation history
-- User session data
-- Component metadata and settings
+- LangFlow workflow configurations and metadata
+- Open WebUI chat conversations and user data  
+- Component settings and cache
+- **Shared PostgreSQL instance** with dedicated databases:
+  - `langflow` database for LangFlow data
+  - `openwebui` database for Open WebUI data
 
 ## Ready-to-Use Blocks
 
@@ -181,8 +183,9 @@ Persistent storage for:
 
 ### Prerequisites
 - Docker and Docker Compose
-- 4GB+ RAM recommended
+- 4GB+ RAM recommended  
 - Internet connection for model API access
+- **PostgreSQL Database**: Automatically configured via Docker Compose
 
 ### Quick Start
 ```bash
@@ -226,13 +229,29 @@ See [HELM_DEVELOPMENT.md](./HELM_DEVELOPMENT.md) for comprehensive production de
 
 ## Configuration
 
-### Environment Variables
-- `LANGFLOW_DATABASE_URL`: PostgreSQL connection string
-- `OPENAI_API_KEY`: API keys for model access
-- `PIPELINES_API_KEY`: Pipeline authentication token
+### Database Configuration
+Both environments (Docker Compose and Helm) use **PostgreSQL** for data persistence:
 
-### Model API Keys
-Configure your AI model API keys in the pipeline files or via environment variables for production deployments.
+**Docker Compose:**
+- PostgreSQL server: `postgres:5432`  
+- Langflow database: `postgresql://langflow:langflow@postgres:5432/langflow`
+- Open WebUI database: `postgresql://langflow:langflow@postgres:5432/openwebui`
+
+**Environment Variables:**
+- `POSTGRES_DB=langflow` - Primary database name
+- `POSTGRES_USER=langflow` - Database user  
+- `POSTGRES_PASSWORD=langflow` - Database password (change in production)
+- `DATABASE_URL` - Open WebUI PostgreSQL connection string
+- `LANGFLOW_DATABASE_URL` - Langflow PostgreSQL connection string
+
+### API Configuration
+- `OPENAI_API_KEY`: API keys for model access
+- `PIPELINES_API_KEY=0p3n-w3bu`: Pipeline authentication token
+- `OPENAI_API_BASE_URL=http://pipelines:9099/v1`: Pipeline integration URL
+
+### Development vs Production
+- **Development**: Uses default credentials in `.env` file
+- **Production**: Use secrets management (Kubernetes secrets, external vaults)
 
 ## Contributing
 
