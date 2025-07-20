@@ -17,50 +17,31 @@ fi
 
 # Stop existing containers if running
 echo -e "${YELLOW}📦 Stopping existing containers...${NC}"
-docker-compose -f docker-compose.yml down 2>/dev/null || true
-docker-compose -f docker-compose.openwebui.yml down 2>/dev/null || true
+docker compose down 2>/dev/null || true
 
 # Clean up old volumes if requested
 if [[ "$1" == "--clean" ]]; then
     echo -e "${YELLOW}🧹 Cleaning up old data volumes...${NC}"
-    docker volume rm langflow-ui_postgres_data 2>/dev/null || true
-    docker volume rm langflow-ui_redis_data 2>/dev/null || true
-    docker volume rm langflow-ui_langflow_data 2>/dev/null || true
-    docker volume rm langflow-ui_open_webui_data 2>/dev/null || true
+    docker volume rm langflow-ui_langflow-postgres 2>/dev/null || true
+    docker volume rm langflow-ui_langflow-data 2>/dev/null || true
+    docker volume rm langflow-ui_pipelines 2>/dev/null || true
 fi
 
-# Create .env.openwebui if it doesn't exist
-if [ ! -f .env.openwebui ]; then
-    echo -e "${BLUE}📝 Creating .env.openwebui file...${NC}"
-    cat > .env.openwebui << EOF
-# Database Configuration
-POSTGRES_DB=langflow_db
-POSTGRES_USER=langflow_user
-POSTGRES_PASSWORD=langflow_pass_$(date +%s)
-
-# Langflow Configuration
-LANGFLOW_SUPERUSER=admin
-LANGFLOW_SUPERUSER_PASSWORD=admin123
-LANGFLOW_SECRET_KEY=super-secret-key-$(openssl rand -hex 32)
-
-# Open WebUI Configuration
-WEBUI_SECRET_KEY=webui-secret-$(openssl rand -hex 32)
-OPENAI_API_KEY=sk-langflow-integration-key
-
-# Security (change in production)
-WEBUI_AUTH=true
-LANGFLOW_AUTO_LOGIN=false
-EOF
-    echo -e "${GREEN}✅ Created .env.openwebui with secure defaults${NC}"
+# Create .env file if it doesn't exist
+if [ ! -f .env ]; then
+    echo -e "${BLUE}📝 Creating .env file from template...${NC}"
+    cp .env.example .env
+    echo -e "${GREEN}✅ Created .env file with default values${NC}"
+    echo -e "${YELLOW}💡 Edit .env file to customize database credentials and secrets${NC}"
 fi
 
 # Pull latest images
 echo -e "${BLUE}📥 Pulling latest Docker images...${NC}"
-docker-compose -f docker-compose.openwebui.yml pull
+docker compose pull
 
 # Start services
 echo -e "${BLUE}🏗️ Starting Langflow + Open WebUI services...${NC}"
-docker-compose -f docker-compose.openwebui.yml up -d
+docker compose up -d
 
 # Wait for services to be healthy
 echo -e "${YELLOW}⏳ Waiting for services to be ready...${NC}"
@@ -85,9 +66,8 @@ check_service() {
 }
 
 # Health checks
-check_service "postgres" "postgres://langflow_user:langflow_pass@localhost:5432/langflow_db" "PostgreSQL"
-check_service "redis" "redis://localhost:6379" "Redis"
-check_service "langflow" "http://localhost:7860/health" "Langflow"
+check_service "postgres" "postgresql://langflow:langflow@localhost:5432/langflow" "PostgreSQL"
+check_service "langflow" "http://localhost:7860/health" "Langflow"  
 check_service "pipelines" "http://localhost:9099/health" "Pipelines"
 check_service "open-webui" "http://localhost:3000/health" "Open WebUI"
 
@@ -115,7 +95,7 @@ echo -e "${YELLOW}💡 Pipeline Integration:${NC}"
 echo -e "  • Messages are processed through Pipelines → Langflow"
 echo -e "  • Use ${YELLOW}@flow:flow-id${NC} to specify which flow to use"
 echo -e "  • Pipeline handles authentication and routing"
-echo -e "  • Check logs: ${YELLOW}docker-compose -f docker-compose.openwebui.yml logs pipelines${NC}"
+echo -e "  • Check logs: ${YELLOW}docker compose logs pipelines${NC}"
 echo ""
 echo -e "${BLUE}🤖 AI Workflow Examples:${NC}"
 echo -e "  • Gemini 2.5 Flash: ${YELLOW}examples/langflow-workflows/basic-gemini-chat.json${NC}"
@@ -129,7 +109,7 @@ echo -e "  • Configure Langflow flows and expose them via API"
 echo -e "  • Use Open WebUI's pipelines feature for custom integrations"
 echo ""
 echo -e "${BLUE}🛠️ Management Commands:${NC}"
-echo -e "  Stop:    ${YELLOW}docker-compose -f docker-compose.openwebui.yml down${NC}"
-echo -e "  Logs:    ${YELLOW}docker-compose -f docker-compose.openwebui.yml logs -f${NC}"
+echo -e "  Stop:    ${YELLOW}docker compose down${NC}"
+echo -e "  Logs:    ${YELLOW}docker compose logs -f${NC}"
 echo -e "  Clean:   ${YELLOW}./setup-openwebui.sh --clean${NC}"
 echo ""
