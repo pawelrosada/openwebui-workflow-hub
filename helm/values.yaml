@@ -1,0 +1,207 @@
+# Default values for langflow-app (English only; minimal config for K8s deployment).
+replicaCount: 1  # Scale app pods
+
+image:
+  repository: langflowai/langflow
+  pullPolicy: IfNotPresent
+  tag: "latest"
+
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext: {}
+
+securityContext: {}
+
+service:
+  type: ClusterIP
+  port: 7860
+  annotations: {}
+    # For GCP Load Balancer (uncomment if needed):
+    # cloud.google.com/neg: '{"ingress": true}'
+    # service.beta.kubernetes.io/do-loadbalancer-enable-proxy-protocol: "true"
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+    # For GCP Load Balancer (uncomment if needed):
+    # kubernetes.io/ingress.class: "gce"
+    # kubernetes.io/ingress.global-static-ip-name: "your-ip-name"
+    # ingress.gcp.kubernetes.io/load-balancer-type: "External"
+  hosts:
+    - host: langflow.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+
+resources:
+  limits:
+    memory: 1Gi
+  requests:
+    memory: 512Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+# Official PostgreSQL chart configuration (Bitnami)
+postgresql:
+  enabled: true  # Deploy official PostgreSQL chart
+  auth:
+    database: langflow_db  # Dedicated database for LangFlow
+    username: langflow_user
+    # For development only - use secrets in production
+    password: ""  # Leave empty to use secret reference
+    postgresPassword: ""  # Leave empty to use secret reference
+    # Secret references for production (if secrets.create is false)
+    existingSecret: ""  # Name of existing secret
+    secretKeys:
+      userPasswordKey: "postgresql-password"
+      adminPasswordKey: "postgresql-postgres-password"
+  primary:
+    persistence:
+      enabled: true
+      size: 8Gi  # Scalable storage
+      storageClass: ""  # Use default storage class (works with GKE)
+    resources:
+      requests:
+        memory: 256Mi
+      limits:
+        memory: 512Mi
+
+# MCP Servers configuration - Easy to add multiple servers for different apps
+mcpServers:
+  # Example MCP server for GitHub integration
+  github-mcp:
+    enabled: true
+    replicas: 1
+    image:
+      repository: modelcontextprotocol/server-github
+      tag: "latest"
+      pullPolicy: IfNotPresent
+    service:
+      type: ClusterIP
+      port: 9099
+    resources:
+      requests:
+        memory: 256Mi
+      limits:
+        memory: 512Mi
+    # Environment variables (non-sensitive)
+    env:
+      - name: GITHUB_REPO_OWNER
+        value: ""  # Set repository owner
+    # Sensitive data stored in secrets
+    secrets: {}  # Add: GITHUB_PERSONAL_ACCESS_TOKEN: "your-token"
+    # Reference to existing secret (if secrets.create is false)
+    existingSecret: ""  # Name of existing secret containing GITHUB_PERSONAL_ACCESS_TOKEN
+  
+  # Example MCP server for filesystem operations
+  filesystem-mcp:
+    enabled: false
+    replicas: 1
+    image:
+      repository: modelcontextprotocol/server-filesystem
+      tag: "latest"
+      pullPolicy: IfNotPresent
+    service:
+      type: ClusterIP
+      port: 9100
+    resources:
+      requests:
+        memory: 128Mi
+      limits:
+        memory: 256Mi
+    env: []
+    secrets: {}
+    existingSecret: ""
+
+  # Example MCP server for web scraping
+  brave-search-mcp:
+    enabled: false
+    replicas: 1
+    image:
+      repository: modelcontextprotocol/server-brave-search
+      tag: "latest"
+      pullPolicy: IfNotPresent
+    service:
+      type: ClusterIP
+      port: 9101
+    resources:
+      requests:
+        memory: 256Mi
+      limits:
+        memory: 512Mi
+    env: []
+    # Sensitive data stored in secrets
+    secrets: {}  # Add: BRAVE_API_KEY: "your-api-key"
+    existingSecret: ""  # Name of existing secret containing BRAVE_API_KEY
+
+# Open WebUI configuration (optional)
+openwebui:
+  enabled: false
+  image:
+    repository: ghcr.io/open-webui/open-webui
+    tag: "main"
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 8080
+  resources:
+    requests:
+      memory: 256Mi
+    limits:
+      memory: 512Mi
+  # Database configuration for production use
+  database:
+    # Set to true to use PostgreSQL instead of SQLite (recommended for production)
+    usePostgreSQL: true
+    # Database name for OpenWebUI (will be created in the same PostgreSQL instance)
+    name: "openwebui_db"
+    # Set to false to use existing PostgreSQL instance configured above
+    # Set to true to deploy separate PostgreSQL for OpenWebUI only  
+    separatePostgreSQL: false
+
+# For dynamic configs in Azure/K8s with Helm
+extraEnv: []
+
+# Configuration
+config:
+  langflowConfigDir: "/app/langflow"
+  langflowAutoLogin: "false"
+  langflowSuperuser: "admin"
+  # For development only - use secrets in production
+  langflowSuperuserPassword: ""  # Leave empty to use secret reference
+
+# Secrets management for sensitive data (API keys, tokens, passwords)
+secrets:
+  # Set to true to create secrets from this chart
+  create: true
+  
+  # LangFlow secrets
+  langflow:
+    superuserPassword: "admin123"  # Only for development - use external secrets in production
+  
+  # PostgreSQL secrets
+  postgresql:
+    password: "changeme"  # Only for development
+    postgresPassword: "postgres_admin_password"  # Only for development
+  
+  # Note: In production, set secrets.create=false and use external secret management
+  # like External Secrets Operator, Vault, or kubectl to create secrets manually

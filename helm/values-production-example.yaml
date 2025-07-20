@@ -1,0 +1,114 @@
+# Production values example with external secrets management
+# This shows how to deploy with proper security practices
+
+# Disable built-in secrets - use external secret management instead
+secrets:
+  create: false
+
+# Use external secrets for sensitive data
+postgresql:
+  enabled: true
+  auth:
+    database: langflow_db
+    username: langflow_user
+    # Passwords will come from external secret
+    password: ""
+    postgresPassword: ""
+    # Reference existing secret created by external system
+    existingSecret: "langflow-postgresql-secret"
+    secretKeys:
+      userPasswordKey: "password"
+      adminPasswordKey: "postgres-password"
+
+# LangFlow configuration
+config:
+  langflowConfigDir: "/app/langflow"
+  langflowAutoLogin: "false"
+  langflowSuperuser: "admin"
+  # Password will come from external secret
+  langflowSuperuserPassword: ""
+
+# MCP servers with external secrets
+mcpServers:
+  github-mcp:
+    enabled: true
+    replicas: 2
+    image:
+      repository: modelcontextprotocol/server-github
+      tag: "latest"
+    service:
+      type: ClusterIP
+      port: 9099
+    resources:
+      requests:
+        memory: 256Mi
+      limits:
+        memory: 512Mi
+    env:
+      - name: GITHUB_REPO_OWNER
+        value: "your-org"
+    # Use external secret for API tokens
+    existingSecret: "github-mcp-secrets"
+    secrets: {}  # Empty - using external secret
+
+  brave-search-mcp:
+    enabled: true
+    replicas: 1
+    image:
+      repository: modelcontextprotocol/server-brave-search
+      tag: "latest"
+    service:
+      type: ClusterIP
+      port: 9101
+    resources:
+      requests:
+        memory: 256Mi
+      limits:
+        memory: 512Mi
+    # Use external secret for API keys
+    existingSecret: "brave-search-secrets"
+    secrets: {}  # Empty - using external secret
+
+# Enable ingress for production
+ingress:
+  enabled: true
+  className: "gce"
+  annotations:
+    kubernetes.io/ingress.class: "gce"
+    kubernetes.io/ingress.global-static-ip-name: "langflow-ip"
+    ingress.gcp.kubernetes.io/load-balancer-type: "External"
+  hosts:
+    - host: langflow.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: langflow-tls
+      hosts:
+        - langflow.example.com
+
+# Production service configuration
+service:
+  type: NodePort
+  annotations:
+    cloud.google.com/neg: '{"ingress": true}'
+
+# Production resources
+resources:
+  limits:
+    memory: 2Gi
+  requests:
+    memory: 1Gi
+
+# PostgreSQL production settings
+postgresql:
+  primary:
+    persistence:
+      enabled: true
+      size: 50Gi
+      storageClass: "ssd"
+    resources:
+      requests:
+        memory: 1Gi
+      limits:
+        memory: 2Gi

@@ -1,0 +1,116 @@
+1. Get the application URL by running these commands:
+{{- if .Values.ingress.enabled }}
+{{- range $host := .Values.ingress.hosts }}
+  {{- range .paths }}
+  http{{ if $.Values.ingress.tls }}s{{ end }}://{{ $host.host }}{{ .path }}
+  {{- end }}
+{{- end }}
+{{- else if contains "NodePort" .Values.service.type }}
+  export NODE_PORT=$(kubectl get --namespace {{ .Release.Namespace }} -o jsonpath="{.spec.ports[0].nodePort}" services {{ include "langflow-app.fullname" . }})
+  export NODE_IP=$(kubectl get nodes --namespace {{ .Release.Namespace }} -o jsonpath="{.items[0].status.addresses[0].address}")
+  echo http://$NODE_IP:$NODE_PORT
+{{- else if contains "LoadBalancer" .Values.service.type }}
+     NOTE: It may take a few minutes for the LoadBalancer IP to be available.
+           You can watch the status of by running 'kubectl get --namespace {{ .Release.Namespace }} svc -w {{ include "langflow-app.fullname" . }}'
+  export SERVICE_IP=$(kubectl get svc --namespace {{ .Release.Namespace }} {{ include "langflow-app.fullname" . }} --template "{{"{{ range (index .status.loadBalancer.ingress 0) }}{{.}}{{ end }}"}}")
+  echo http://$SERVICE_IP:{{ .Values.service.port }}
+{{- else if contains "ClusterIP" .Values.service.type }}
+  export POD_NAME=$(kubectl get pods --namespace {{ .Release.Namespace }} -l "app.kubernetes.io/name={{ include "langflow-app.name" . }},app.kubernetes.io/instance={{ .Release.Name }}" -o jsonpath="{.items[0].metadata.name}")
+  export CONTAINER_PORT=$(kubectl get pod --namespace {{ .Release.Namespace }} $POD_NAME -o jsonpath="{.spec.containers[0].ports[0].containerPort}")
+  echo "Visit http://127.0.0.1:7860 to use your application"
+  kubectl --namespace {{ .Release.Namespace }} port-forward $POD_NAME 7860:$CONTAINER_PORT
+{{- end }}
+
+2. LangFlow is now deployed with:
+   - Official PostgreSQL chart (Bitnami) database: {{ .Values.postgresql.auth.database }}
+   - Database user: {{ .Values.postgresql.auth.username }}
+{{- $mcpCount := 0 }}
+{{- range $serverName, $server := .Values.mcpServers }}
+{{- if $server.enabled }}
+{{- $mcpCount = add $mcpCount 1 }}
+{{- end }}
+{{- end }}
+{{- if gt $mcpCount 0 }}
+   - MCP servers deployed: {{ $mcpCount }}
+{{- range $serverName, $server := .Values.mcpServers }}
+{{- if $server.enabled }}
+     * {{ $serverName }}: {{ $server.replicas }} replicas ({{ $server.image.repository }}:{{ $server.image.tag }})
+{{- end }}
+{{- end }}
+{{- end }}
+{{- if .Values.openwebui.enabled }}
+   - OpenWebUI interface available at port {{ .Values.openwebui.service.port }}
+{{- if .Values.openwebui.database.usePostgreSQL }}
+     * Using PostgreSQL database: {{ .Values.openwebui.database.name }} (production-ready)
+{{- else }}
+     * Using SQLite (development only - data will be lost on pod restart)
+{{- end }}
+{{- end }}
+
+3. Default credentials (development only):
+{{- if .Values.secrets.create }}
+   - LangFlow admin: {{ .Values.config.langflowSuperuser }} / (stored in secret {{ include "langflow-app.fullname" . }}-secrets)
+   - PostgreSQL: {{ .Values.postgresql.auth.username }} / (stored in secret {{ include "langflow-app.fullname" . }}-secrets)
+{{- else }}
+   - LangFlow admin: {{ .Values.config.langflowSuperuser }} / {{ .Values.config.langflowSuperuserPassword }}
+   - PostgreSQL: {{ .Values.postgresql.auth.username }} / {{ .Values.postgresql.auth.password }}
+{{- end }}
+
+4. SECURITY NOTICE - Secrets Management:
+{{- if .Values.secrets.create }}
+   WARNING: Using built-in secrets for development only!
+   For production, set secrets.create=false and use external secret management:
+   
+   # Create secrets manually for production
+   kubectl create secret generic {{ include "langflow-app.fullname" . }}-secrets \
+     --from-literal=langflow-superuser-password=YOUR_SECURE_PASSWORD \
+     --from-literal=postgresql-password=YOUR_DB_PASSWORD \
+     -n {{ .Release.Namespace }}
+     
+   # For MCP servers with API keys
+   kubectl create secret generic {{ include "langflow-app.fullname" . }}-mcp-github-mcp-secrets \
+     --from-literal=GITHUB_PERSONAL_ACCESS_TOKEN=YOUR_GITHUB_TOKEN \
+     -n {{ .Release.Namespace }}
+{{- else }}
+   Using external secrets - ensure all required secrets exist in namespace {{ .Release.Namespace }}
+{{- end }}
+
+5. To add a new MCP server with secrets:
+   mcpServers:
+     your-custom-server:
+       enabled: true
+       replicas: 1
+       image:
+         repository: your-mcp-server-image
+         tag: "latest"
+       service:
+         type: ClusterIP
+         port: 9102
+       env:  # Non-sensitive config
+         - name: YOUR_CONFIG
+           value: "your-value"
+       secrets:  # Sensitive data (stored in K8s secrets)
+         YOUR_API_KEY: "your-secret-api-key"
+       # OR use existing external secret:
+       # existingSecret: "your-external-secret-name"
+
+6. To scale existing MCP servers:
+   helm upgrade {{ .Release.Name }} ./helm --set mcpServers.github-mcp.replicas=3
+
+7. To access logs:
+   kubectl logs -f deployment/{{ include "langflow-app.fullname" . }} -n {{ .Release.Namespace }}
+
+8. To check all services:
+   kubectl get all -l app.kubernetes.io/instance={{ .Release.Name }} -n {{ .Release.Namespace }}
+
+9. For GKE deployment with load balancer:
+   # Enable ingress with GCP annotations
+   helm upgrade {{ .Release.Name }} ./helm \
+     --set ingress.enabled=true \
+     --set ingress.annotations."kubernetes\.io/ingress\.class"=gce \
+     --set service.type=NodePort
+
+10. Chart uses official community charts:
+    - PostgreSQL: Bitnami PostgreSQL chart (no CPU limits)
+    - Optimized for GKE and GCP Load Balancers
+    - Secure secrets management following K8s best practices
