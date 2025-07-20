@@ -71,4 +71,4 @@ Keep this repository focused on providing a simple, working integration between 
 
 ---
 
-*Ostatnia aktualizacja: Styczeń 2025*
+*Last updated: January 2025*

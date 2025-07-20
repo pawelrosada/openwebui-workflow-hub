@@ -1,5 +1,5 @@
 """
-Pipeline Generator - uruchamia się automatycznie i generuje pliki dla każdego workflow
+Pipeline Generator - automatically starts and generates files for each workflow
 """
 
 import os
@@ -21,32 +21,32 @@ class Pipeline:
         self.generated = False
 
     async def on_startup(self):
-        """Automatycznie generuj pipeline przy starcie"""
+        """Automatically generate pipeline on startup"""
         if not self.generated:
             logger.info("🚀 Starting pipeline generation...")
             await self.generate_workflow_pipelines()
             self.generated = True
 
     def pipe(self, user_message: str, model_id: str, messages: List[dict], body: dict):
-        return f"🔧 Pipeline Generator\n\n✅ Automatycznie generuję pliki pipeline dla każdego workflow z Langflow.\n\nSprawdź inne dostępne modele w OpenWebUI - każdy workflow powinien być dostępny jako osobny model!"
+        return f"🔧 Pipeline Generator\n\n✅ Automatically generating pipeline files for each workflow from Langflow.\n\nCheck other available models in OpenWebUI - each workflow should be available as a separate model!"
 
     async def generate_workflow_pipelines(self):
-        """Główna funkcja generująca pipeline"""
+        """Main function for generating pipelines"""
         try:
             langflow_url = os.getenv("LANGFLOW_BASE_URL", "http://langflow:7860")
             pipelines_dir = Path("/app/pipelines")
 
-            # Czekaj na Langflow
+            # Wait for Langflow
             await self.wait_for_langflow(langflow_url)
 
-            # Pobierz workflow
+            # Get workflows
             workflows = await self.discover_workflows(langflow_url)
 
             if not workflows:
                 logger.warning("❌ No workflows found")
                 return
 
-            # Generuj pliki
+            # Generate files
             template = self.get_template()
             generated_count = 0
 
@@ -71,7 +71,7 @@ class Pipeline:
             logger.error(f"❌ Generation failed: {e}")
 
     async def wait_for_langflow(self, langflow_url: str, max_attempts: int = 30):
-        """Czekaj aż Langflow będzie dostępny"""
+        """Wait until Langflow becomes available"""
         import httpx
 
         for attempt in range(1, max_attempts + 1):
@@ -90,7 +90,7 @@ class Pipeline:
         logger.warning("⚠️  Langflow not ready, proceeding anyway...")
 
     async def discover_workflows(self, langflow_url: str) -> List[Dict]:
-        """Odkryj dostępne workflow"""
+        """Discover available workflows"""
         import httpx
 
         excluded = json.loads(
@@ -137,7 +137,7 @@ class Pipeline:
             return []
 
     def sanitize_name(self, name: str) -> str:
-        """Konwertuj nazwę na prawidłowy identyfikator Python"""
+        """Convert name to valid Python identifier"""
         sanitized = re.sub(r"[^a-zA-Z0-9_]", "_", name)
         sanitized = re.sub(r"_+", "_", sanitized)
         sanitized = sanitized.strip("_")
@@ -146,7 +146,7 @@ class Pipeline:
         return sanitized.lower()
 
     def get_template(self) -> str:
-        """Template dla generowanych pipeline"""
+        """Template for generated pipelines"""
         return '''"""
 Langflow Workflow: {{WORKFLOW_NAME}}
 Auto-generated pipeline
@@ -207,18 +207,18 @@ class Pipeline:
                     .get("outputs", [{}])[0]
                     .get("results", {})
                     .get("message", {})
-                    .get("text", f"Brak odpowiedzi z workflow '{self.valves.WORKFLOW_NAME}'.")
+                    .get("text", f"No response from workflow '{self.valves.WORKFLOW_NAME}'.")
                 )
 
                 yield text
 
         except Exception as e:
             logger.error(f"Error calling workflow: {e}")
-            yield f"🚨 **Błąd**: {str(e)}"
+            yield f"🚨 **Error**: {str(e)}"
 '''
 
     def generate_pipeline_code(self, workflow: Dict, template: str) -> str:
-        """Generuj kod pipeline z template"""
+        """Generate pipeline code from template"""
         workflow_name = workflow["name"]
         workflow_id = workflow["id"]
 
