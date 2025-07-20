@@ -66,8 +66,14 @@ postgresql:
   auth:
     database: langflow_db  # Dedicated database for LangFlow
     username: langflow_user
-    password: changeme  # Use secrets in production
-    postgresPassword: postgres_admin_password  # Admin password
+    # For development only - use secrets in production
+    password: ""  # Leave empty to use secret reference
+    postgresPassword: ""  # Leave empty to use secret reference
+    # Secret references for production (if secrets.create is false)
+    existingSecret: ""  # Name of existing secret
+    secretKeys:
+      userPasswordKey: "postgresql-password"
+      adminPasswordKey: "postgresql-postgres-password"
   primary:
     persistence:
       enabled: true
@@ -97,9 +103,14 @@ mcpServers:
         memory: 256Mi
       limits:
         memory: 512Mi
+    # Environment variables (non-sensitive)
     env:
-      - name: GITHUB_PERSONAL_ACCESS_TOKEN
-        value: ""  # Set your token here
+      - name: GITHUB_REPO_OWNER
+        value: ""  # Set repository owner
+    # Sensitive data stored in secrets
+    secrets: {}  # Add: GITHUB_PERSONAL_ACCESS_TOKEN: "your-token"
+    # Reference to existing secret (if secrets.create is false)
+    existingSecret: ""  # Name of existing secret containing GITHUB_PERSONAL_ACCESS_TOKEN
   
   # Example MCP server for filesystem operations
   filesystem-mcp:
@@ -118,6 +129,8 @@ mcpServers:
       limits:
         memory: 256Mi
     env: []
+    secrets: {}
+    existingSecret: ""
 
   # Example MCP server for web scraping
   brave-search-mcp:
@@ -135,9 +148,10 @@ mcpServers:
         memory: 256Mi
       limits:
         memory: 512Mi
-    env:
-      - name: BRAVE_API_KEY
-        value: ""  # Set your API key here
+    env: []
+    # Sensitive data stored in secrets
+    secrets: {}  # Add: BRAVE_API_KEY: "your-api-key"
+    existingSecret: ""  # Name of existing secret containing BRAVE_API_KEY
 
 # Open WebUI configuration (optional)
 openwebui:
@@ -163,4 +177,22 @@ config:
   langflowConfigDir: "/app/langflow"
   langflowAutoLogin: "false"
   langflowSuperuser: "admin"
-  langflowSuperuserPassword: "admin123"
+  # For development only - use secrets in production
+  langflowSuperuserPassword: ""  # Leave empty to use secret reference
+
+# Secrets management for sensitive data (API keys, tokens, passwords)
+secrets:
+  # Set to true to create secrets from this chart
+  create: true
+  
+  # LangFlow secrets
+  langflow:
+    superuserPassword: "admin123"  # Only for development - use external secrets in production
+  
+  # PostgreSQL secrets
+  postgresql:
+    password: "changeme"  # Only for development
+    postgresPassword: "postgres_admin_password"  # Only for development
+  
+  # Note: In production, set secrets.create=false and use external secret management
+  # like External Secrets Operator, Vault, or kubectl to create secrets manually

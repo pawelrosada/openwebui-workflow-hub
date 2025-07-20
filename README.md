@@ -92,12 +92,60 @@ helm install my-langflow ./helm \
   --set service.annotations."cloud\.google\.com/neg"='{"ingress": true}'
 ```
 
+### Security & Secrets Management
+
+The Helm chart follows Kubernetes security best practices for handling sensitive data:
+
+#### Development (built-in secrets)
+```bash
+# Quick development setup with built-in secrets
+helm install my-langflow ./helm
+```
+
+#### Production (external secrets)
+```bash
+# 1. Create secrets manually first
+kubectl create secret generic my-langflow-secrets \
+  --from-literal=langflow-superuser-password=YOUR_SECURE_PASSWORD \
+  --from-literal=postgresql-password=YOUR_DB_PASSWORD
+
+# 2. Create MCP server secrets
+kubectl create secret generic my-langflow-mcp-github-mcp-secrets \
+  --from-literal=GITHUB_PERSONAL_ACCESS_TOKEN=YOUR_GITHUB_TOKEN
+
+# 3. Deploy without built-in secrets
+helm install my-langflow ./helm \
+  --set secrets.create=false \
+  --values values-production-example.yaml
+```
+
+#### MCP Server Security
+Add API keys securely to MCP servers:
+
+```yaml
+mcpServers:
+  your-custom-server:
+    enabled: true
+    image:
+      repository: your-mcp-server
+    # Non-sensitive config
+    env:
+      - name: SERVER_CONFIG
+        value: "public-value"
+    # Sensitive data in Kubernetes secrets
+    secrets:
+      API_KEY: "your-secret-key"
+      TOKEN: "your-token"
+```
+
 ### Production Best Practices
 
 ✅ **No CPU limits** - Follows Kubernetes best practices for better performance
 ✅ **Memory limits only** - Prevents OOM while allowing CPU bursting  
 ✅ **GKE optimized** - Compatible with Google Kubernetes Engine
 ✅ **Official chart pattern** - Uses community standards for PostgreSQL
+✅ **Secure secrets** - Kubernetes Secret objects for sensitive data
+✅ **External secret support** - Compatible with secret management systems
 
 ### Docker Compose (Alternative)
 

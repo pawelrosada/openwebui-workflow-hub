@@ -51,8 +51,22 @@ spec:
             periodSeconds: 10
           env:
             {{- if .Values.postgresql.enabled }}
+            - name: POSTGRES_PASSWORD
+              {{- if .Values.secrets.create }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "langflow-app.fullname" . }}-secrets
+                  key: postgresql-password
+              {{- else if .Values.postgresql.auth.existingSecret }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.postgresql.auth.existingSecret }}
+                  key: {{ .Values.postgresql.auth.secretKeys.userPasswordKey }}
+              {{- else }}
+              value: {{ .Values.postgresql.auth.password }}
+              {{- end }}
             - name: LANGFLOW_DATABASE_URL
-              value: "postgresql://{{ .Values.postgresql.auth.username }}:{{ .Values.postgresql.auth.password }}@{{ include "langflow-app.fullname" . }}-postgresql:5432/{{ .Values.postgresql.auth.database }}"
+              value: "postgresql://{{ .Values.postgresql.auth.username }}:$(POSTGRES_PASSWORD)@{{ include "langflow-app.fullname" . }}-postgresql:5432/{{ .Values.postgresql.auth.database }}"
             {{- end }}
             - name: LANGFLOW_CONFIG_DIR
               value: {{ .Values.config.langflowConfigDir }}
@@ -61,7 +75,14 @@ spec:
             - name: LANGFLOW_SUPERUSER
               value: {{ .Values.config.langflowSuperuser }}
             - name: LANGFLOW_SUPERUSER_PASSWORD
+              {{- if .Values.secrets.create }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "langflow-app.fullname" . }}-secrets
+                  key: langflow-superuser-password
+              {{- else }}
               value: {{ .Values.config.langflowSuperuserPassword }}
+              {{- end }}
             {{- with .Values.extraEnv }}
             {{- toYaml . | nindent 12 }}
             {{- end }}

@@ -31,9 +31,29 @@ spec:
             - name: http
               containerPort: {{ $server.service.port }}
               protocol: TCP
-          {{- if $server.env }}
+          {{- if or $server.env $server.secrets }}
           env:
+            {{- if $server.env }}
             {{- toYaml $server.env | nindent 12 }}
+            {{- end }}
+            {{- if $server.secrets }}
+            {{- range $key, $value := $server.secrets }}
+            - name: {{ $key }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "langflow-app.fullname" $ }}-mcp-{{ $serverName }}-secrets
+                  key: {{ $key }}
+            {{- end }}
+            {{- end }}
+            {{- if $server.existingSecret }}
+            {{- range $envName := (keys $server.secrets | default list) }}
+            - name: {{ $envName }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $server.existingSecret }}
+                  key: {{ $envName }}
+            {{- end }}
+            {{- end }}
             {{- with $.Values.extraEnv }}
             {{- toYaml . | nindent 12 }}
             {{- end }}

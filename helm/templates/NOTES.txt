@@ -42,10 +42,35 @@
    - OpenWebUI interface available at port {{ .Values.openwebui.service.port }}
 {{- end }}
 
-3. Default credentials:
+3. Default credentials (development only):
+{{- if .Values.secrets.create }}
+   - LangFlow admin: {{ .Values.config.langflowSuperuser }} / (stored in secret {{ include "langflow-app.fullname" . }}-secrets)
+   - PostgreSQL: {{ .Values.postgresql.auth.username }} / (stored in secret {{ include "langflow-app.fullname" . }}-secrets)
+{{- else }}
    - LangFlow admin: {{ .Values.config.langflowSuperuser }} / {{ .Values.config.langflowSuperuserPassword }}
+   - PostgreSQL: {{ .Values.postgresql.auth.username }} / {{ .Values.postgresql.auth.password }}
+{{- end }}
 
-4. To add a new MCP server, add it to values.yaml:
+4. SECURITY NOTICE - Secrets Management:
+{{- if .Values.secrets.create }}
+   WARNING: Using built-in secrets for development only!
+   For production, set secrets.create=false and use external secret management:
+   
+   # Create secrets manually for production
+   kubectl create secret generic {{ include "langflow-app.fullname" . }}-secrets \
+     --from-literal=langflow-superuser-password=YOUR_SECURE_PASSWORD \
+     --from-literal=postgresql-password=YOUR_DB_PASSWORD \
+     -n {{ .Release.Namespace }}
+     
+   # For MCP servers with API keys
+   kubectl create secret generic {{ include "langflow-app.fullname" . }}-mcp-github-mcp-secrets \
+     --from-literal=GITHUB_PERSONAL_ACCESS_TOKEN=YOUR_GITHUB_TOKEN \
+     -n {{ .Release.Namespace }}
+{{- else }}
+   Using external secrets - ensure all required secrets exist in namespace {{ .Release.Namespace }}
+{{- end }}
+
+5. To add a new MCP server with secrets:
    mcpServers:
      your-custom-server:
        enabled: true
@@ -56,26 +81,31 @@
        service:
          type: ClusterIP
          port: 9102
-       env:
+       env:  # Non-sensitive config
          - name: YOUR_CONFIG
            value: "your-value"
+       secrets:  # Sensitive data (stored in K8s secrets)
+         YOUR_API_KEY: "your-secret-api-key"
+       # OR use existing external secret:
+       # existingSecret: "your-external-secret-name"
 
-5. To scale existing MCP servers:
+6. To scale existing MCP servers:
    helm upgrade {{ .Release.Name }} ./helm --set mcpServers.github-mcp.replicas=3
 
-6. To access logs:
+7. To access logs:
    kubectl logs -f deployment/{{ include "langflow-app.fullname" . }} -n {{ .Release.Namespace }}
 
-7. To check all services:
+8. To check all services:
    kubectl get all -l app.kubernetes.io/instance={{ .Release.Name }} -n {{ .Release.Namespace }}
 
-8. For GKE deployment with load balancer:
+9. For GKE deployment with load balancer:
    # Enable ingress with GCP annotations
    helm upgrade {{ .Release.Name }} ./helm \
      --set ingress.enabled=true \
      --set ingress.annotations."kubernetes\.io/ingress\.class"=gce \
      --set service.type=NodePort
 
-9. Chart uses official community charts:
-   - PostgreSQL: Bitnami PostgreSQL chart (no CPU limits)
-   - Optimized for GKE and GCP Load Balancers
+10. Chart uses official community charts:
+    - PostgreSQL: Bitnami PostgreSQL chart (no CPU limits)
+    - Optimized for GKE and GCP Load Balancers
+    - Secure secrets management following K8s best practices
