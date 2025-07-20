@@ -19,17 +19,78 @@ The framework bridges the gap between user-friendly chat interfaces and complex 
 
 ## Architecture
 
+### System Overview
+
+```mermaid
+graph TB
+    User([👤 User]) --> OpenWebUI[🌐 OpenWebUI<br/>Chat Interface<br/>:3000]
+    
+    OpenWebUI --> |OpenAI API<br/>HTTP REST| Pipelines[🔧 Pipelines<br/>Integration Layer<br/>:9099]
+    
+    Pipelines --> |HTTP API<br/>JSON| LangFlow[⚡ LangFlow<br/>Workflow Engine<br/>:7860]
+    
+    LangFlow --> |SQL| PostgreSQL[(🗄️ PostgreSQL<br/>Database<br/>:5432)]
+    
+    LangFlow --> |API Calls| AIModels[🤖 AI Models<br/>GPT-4, Gemini, Claude]
+    
+    AIModels --> LangFlow
+    LangFlow --> Pipelines
+    Pipelines --> OpenWebUI
+    OpenWebUI --> User
+    
+    subgraph "Docker Network"
+        OpenWebUI
+        Pipelines
+        LangFlow
+        PostgreSQL
+    end
+    
+    classDef frontend fill:#e1f5fe
+    classDef integration fill:#f3e5f5
+    classDef workflow fill:#e8f5e8
+    classDef database fill:#fff3e0
+    classDef external fill:#fce4ec
+    
+    class OpenWebUI frontend
+    class Pipelines integration
+    class LangFlow workflow
+    class PostgreSQL database
+    class AIModels external
 ```
-User → OpenWebUI → Pipelines → LangFlow → AI Models
-                      ↓
-                 PostgreSQL Database
+
+### Data Flow Architecture
+
+```mermaid
+sequenceDiagram
+    participant U as 👤 User
+    participant OW as 🌐 OpenWebUI
+    participant P as 🔧 Pipelines
+    participant LF as ⚡ LangFlow
+    participant DB as 🗄️ PostgreSQL
+    participant AI as 🤖 AI Models
+
+    U->>OW: Send Message
+    OW->>P: POST /v1/chat/completions
+    P->>P: Rate Limiting & Validation
+    P->>LF: POST /api/v1/run/{workflow_id}
+    LF->>DB: Load Workflow Config
+    DB-->>LF: Workflow Definition
+    LF->>AI: API Request (GPT/Gemini/Claude)
+    AI-->>LF: AI Response
+    LF->>DB: Store Conversation
+    LF-->>P: JSON Response
+    P->>P: Format & Process
+    P-->>OW: Streaming Response
+    OW-->>U: Display Response
 ```
 
 The architecture follows a clean separation of concerns:
 - **Frontend Layer**: OpenWebUI provides the chat interface and user management
-- **Integration Layer**: Custom Python pipelines handle routing and data transformation
+- **Integration Layer**: Custom Python pipelines handle routing and data transformation  
 - **Workflow Layer**: LangFlow manages AI workflows with visual flow builder
 - **Data Layer**: PostgreSQL stores workflow configurations and chat history
+
+> 📋 For detailed technical documentation, component specifications, and advanced architecture patterns, see [ARCHITECTURE.md](./ARCHITECTURE.md)
 
 ## Components
 
