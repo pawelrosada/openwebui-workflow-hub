@@ -1,0 +1,27 @@
+# Helm lint configuration for chart-testing
+# Defines custom linting rules and validation settings
+
+rules:
+  # Chart.yaml validation
+  chart-metadata:
+    version-required: true
+    description-required: true
+    maintainers-required: true
+    keywords-recommended: true
+    home-recommended: true
+    
+  # Template validation
+  templates:
+    # Require resource limits for main containers
+    resources-required: true
+    # Check for security contexts
+    security-context-recommended: true
+    # Validate service account usage
+    service-account-recommended: true
+    
+  # Values validation
+  values:
+    # Check for proper defaults
+    defaults-required: true
+    # Validate resource specifications
+    resources-structure: true

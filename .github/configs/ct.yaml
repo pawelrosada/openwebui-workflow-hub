@@ -1,0 +1,35 @@
+# Configuration for chart-testing
+# https://github.com/helm/chart-testing
+
+# Repository configuration
+target-branch: main
+remote: origin
+
+# Chart directories to test
+chart-dirs:
+  - helm
+
+# Chart repositories for dependency resolution
+chart-repos:
+  - bitnami=https://charts.bitnami.com/bitnami
+  - stable=https://charts.helm.sh/stable
+
+# Helm configuration
+helm-extra-args: --timeout 600s
+helm-extra-set-args: --set=postgresql.auth.enableSuperuserAccess=false
+
+# Validation settings
+check-version-increment: true
+validate-maintainers: false
+validate-chart-schema: true
+validate-yaml-schema: true
+
+# Testing configuration
+upgrade: true
+skip-missing-values: true
+
+# Linting configuration
+lint-conf: .github/configs/lintconf.yaml
+
+# Debug options
+debug: false

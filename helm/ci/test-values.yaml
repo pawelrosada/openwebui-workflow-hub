@@ -1,0 +1,63 @@
+# Test values for minimal chart installation
+# Used by chart-testing for basic functionality validation
+
+# Use lightweight configuration for testing
+replicaCount: 1
+
+image:
+  repository: langflowai/langflow
+  tag: "latest"
+  pullPolicy: IfNotPresent
+
+# Service configuration
+service:
+  type: ClusterIP
+  port: 7860
+
+# Ingress disabled for testing
+ingress:
+  enabled: false
+
+# Resource limits for testing environment
+resources:
+  limits:
+    memory: 1Gi
+  requests:
+    memory: 512Mi
+    cpu: 250m
+
+# PostgreSQL minimal configuration
+postgresql:
+  enabled: true
+  auth:
+    username: langflow_user
+    database: langflow_db
+    enableSuperuserAccess: false
+  primary:
+    persistence:
+      enabled: false  # Disable for testing
+    resources:
+      limits:
+        memory: 512Mi
+      requests:
+        memory: 256Mi
+        cpu: 100m
+
+# Disable MCP servers for minimal testing
+mcpServers:
+  github-mcp:
+    enabled: false
+  filesystem-mcp:
+    enabled: false
+  brave-search-mcp:
+    enabled: false
+
+# OpenWebUI disabled for testing
+openwebui:
+  enabled: false
+
+# Test-specific secrets
+secrets:
+  create: true
+  langflowSuperuserPassword: "test123"
+  postgresqlPassword: "testdb123"
