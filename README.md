@@ -26,22 +26,22 @@ The framework bridges the gap between user-friendly chat interfaces and complex 
 
 ```mermaid
 graph TB
-    User([👤 User]) --> OpenWebUI[🌐 OpenWebUI<br/>Chat Interface<br/>:3000]
+    User([👤 User]) --> OpenWebUI["🌐 OpenWebUI<br/>Chat Interface<br/>Port 3000"]
     
-    OpenWebUI --> |OpenAI API<br/>HTTP REST| Pipelines[🔧 Pipelines<br/>Integration Layer<br/>:9099]
+    OpenWebUI --> |"OpenAI API<br/>HTTP REST"| Pipelines["🔧 Pipelines<br/>Integration Layer<br/>Port 9099"]
     
-    Pipelines --> |HTTP API<br/>JSON| LangFlow[⚡ LangFlow<br/>Workflow Engine<br/>:7860]
+    Pipelines --> |"HTTP API<br/>JSON"| LangFlow["⚡ LangFlow<br/>Workflow Engine<br/>Port 7860"]
     
-    LangFlow --> |SQL| PostgreSQL[(🗄️ PostgreSQL<br/>Database<br/>:5432)]
+    LangFlow --> |SQL| PostgreSQL[("🗄️ PostgreSQL<br/>Database<br/>Port 5432")]
     
-    LangFlow --> |API Calls| AIModels[🤖 AI Models<br/>GPT-4, Gemini, Claude]
+    LangFlow --> |"API Calls"| AIModels["🤖 AI Models<br/>GPT-4, Gemini, Claude"]
     
     AIModels --> LangFlow
     LangFlow --> Pipelines
     Pipelines --> OpenWebUI
     OpenWebUI --> User
     
-    subgraph "Docker Network"
+    subgraph DockerNet ["Docker Network"]
         OpenWebUI
         Pipelines
         LangFlow
@@ -73,16 +73,16 @@ sequenceDiagram
     participant AI as 🤖 AI Models
 
     U->>OW: Send Message
-    OW->>P: POST /v1/chat/completions
-    P->>P: Rate Limiting & Validation
-    P->>LF: POST /api/v1/run/{workflow_id}
+    OW->>P: "POST /v1/chat/completions"
+    P->>P: "Rate Limiting & Validation"
+    P->>LF: "POST /api/v1/run/{workflow_id}"
     LF->>DB: Load Workflow Config
     DB-->>LF: Workflow Definition
-    LF->>AI: API Request (GPT/Gemini/Claude)
+    LF->>AI: "API Request (GPT/Gemini/Claude)"
     AI-->>LF: AI Response
     LF->>DB: Store Conversation
     LF-->>P: JSON Response
-    P->>P: Format & Process
+    P->>P: "Format & Process"
     P-->>OW: Streaming Response
     OW-->>U: Display Response
 ```

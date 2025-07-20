@@ -8,43 +8,43 @@ The OpenWebUI-LangFlow-MCP Integration Framework is a containerized solution tha
 
 ```mermaid
 graph TB
-    subgraph "External Layer"
+    subgraph ExtLayer ["External Layer"]
         User([👤 User Browser])
-        AIProviders[🌍 AI Model Providers<br/>OpenAI, Google, Anthropic]
-        MCPServers[🔌 MCP Servers<br/>External Tools & APIs]
+        AIProviders["🌍 AI Model Providers<br/>OpenAI, Google, Anthropic"]
+        MCPServers["🔌 MCP Servers<br/>External Tools & APIs"]
     end
     
-    subgraph "Docker Compose Environment"
-        subgraph "Frontend Layer"
-            OpenWebUI[🌐 OpenWebUI<br/>Port: 3000<br/>Image: ghcr.io/open-webui/open-webui:main]
+    subgraph DockerEnv ["Docker Compose Environment"]
+        subgraph FrontLayer ["Frontend Layer"]
+            OpenWebUI["🌐 OpenWebUI<br/>Port 3000<br/>Image: ghcr.io/open-webui/open-webui:main"]
         end
         
-        subgraph "Integration Layer"
-            Pipelines[🔧 Pipelines<br/>Port: 9099<br/>Image: ghcr.io/open-webui/pipelines:main]
+        subgraph IntLayer ["Integration Layer"]
+            Pipelines["🔧 Pipelines<br/>Port 9099<br/>Image: ghcr.io/open-webui/pipelines:main"]
         end
         
-        subgraph "Workflow Layer" 
-            LangFlow[⚡ LangFlow<br/>Port: 7860<br/>Image: langflowai/langflow:latest]
+        subgraph WorkLayer ["Workflow Layer"] 
+            LangFlow["⚡ LangFlow<br/>Port 7860<br/>Image: langflowai/langflow:latest"]
         end
         
-        subgraph "Data Layer"
-            PostgreSQL[(🗄️ PostgreSQL<br/>Port: 5432<br/>Image: postgres:16)]
+        subgraph DataLayer ["Data Layer"]
+            PostgreSQL[("🗄️ PostgreSQL<br/>Port 5432<br/>Image: postgres:16")]
         end
         
-        subgraph "Storage"
-            OpenWebUIVol[💾 open-webui volume]
-            PipelinesVol[💾 pipelines volume]
-            LangFlowVol[💾 langflow-data volume]
-            PostgreSQLVol[💾 langflow-postgres volume]
+        subgraph Storage
+            OpenWebUIVol["💾 open-webui volume"]
+            PipelinesVol["💾 pipelines volume"]
+            LangFlowVol["💾 langflow-data volume"]
+            PostgreSQLVol["💾 langflow-postgres volume"]
         end
     end
     
-    User --> |HTTPS/HTTP| OpenWebUI
-    OpenWebUI --> |OpenAI API Format<br/>HTTP REST| Pipelines
-    Pipelines --> |Custom HTTP API<br/>JSON Payload| LangFlow
-    LangFlow --> |SQL Queries<br/>PostgreSQL Protocol| PostgreSQL
-    LangFlow --> |HTTP/HTTPS<br/>API Calls| AIProviders
-    LangFlow --> |HTTP/WebSocket<br/>MCP Protocol| MCPServers
+    User --> |"HTTPS/HTTP"| OpenWebUI
+    OpenWebUI --> |"OpenAI API Format<br/>HTTP REST"| Pipelines
+    Pipelines --> |"Custom HTTP API<br/>JSON Payload"| LangFlow
+    LangFlow --> |"SQL Queries<br/>PostgreSQL Protocol"| PostgreSQL
+    LangFlow --> |"HTTP/HTTPS<br/>API Calls"| AIProviders
+    LangFlow --> |"HTTP/WebSocket<br/>MCP Protocol"| MCPServers
     
     OpenWebUI -.-> OpenWebUIVol
     Pipelines -.-> PipelinesVol
@@ -179,13 +179,13 @@ sequenceDiagram
     Note over User,MCP: Complete Request-Response Cycle
 
     User->>+OW: Send Chat Message
-    OW->>+P: POST /v1/chat/completions<br/>{model, messages, stream: true}
+    OW->>+P: "POST /v1/chat/completions<br/>{model, messages, stream: true}"
     
     Note over P: Rate Limiting & Validation
     P->>P: Check Rate Limits
     P->>P: Validate Request Format
     
-    P->>+LF: POST /api/v1/run/{workflow_id}<br/>{input_value: "message", stream: true}
+    P->>+LF: "POST /api/v1/run/{workflow_id}<br/>{input_value: message, stream: true}"
     
     Note over LF: Workflow Execution
     LF->>+DB: SELECT workflow_config
@@ -195,7 +195,7 @@ sequenceDiagram
     LF->>LF: Process Input Nodes
     
     alt AI Model Node
-        LF->>+AI: API Request (GPT/Gemini/Claude)
+        LF->>+AI: "API Request (GPT/Gemini/Claude)"
         AI-->>-LF: AI Response
     else MCP Tool Node
         LF->>+MCP: MCP Protocol Request
@@ -207,21 +207,21 @@ sequenceDiagram
     LF->>DB: INSERT conversation_log
     LF->>LF: Process Output Nodes
     
-    LF-->>-P: Stream Response<br/>{data, session_id, message_id}
+    LF-->>-P: "Stream Response<br/>{data, session_id, message_id}"
     
     Note over P: Response Processing
     P->>P: Format OpenAI Compatible Response
     P->>P: Apply Response Filters
     
-    P-->>-OW: Stream SSE Response<br/>data: {"choices": [{"delta": {"content": "..."}}]}
+    P-->>-OW: "Stream SSE Response<br/>data: {choices: [{delta: {content: ...}}]}"
     
     OW-->>-User: Display Streaming Response
 
     Note over User,MCP: Error Handling Path
     alt Error Occurs
         LF->>DB: INSERT error_log
-        LF-->>P: Error Response<br/>{error: "description", type: "error_type"}
-        P-->>OW: HTTP 500 + Error Details
+        LF-->>P: "Error Response<br/>{error: description, type: error_type}"
+        P-->>OW: "HTTP 500 + Error Details"
         OW-->>User: User-Friendly Error Message
     end
 ```
@@ -233,22 +233,22 @@ flowchart TD
     Start([Request Received]) --> Parse[Parse Input Message]
     Parse --> Route{Routing Logic}
     
-    Route -->|Basic| BasicFlow[Basic Langflow Pipeline]
-    Route -->|Enhanced| EnhancedFlow[Enhanced Multi-Model Pipeline]
-    Route -->|Selector| SelectorFlow[Dynamic Workflow Selector]
+    Route -->|"Basic"| BasicFlow[Basic Langflow Pipeline]
+    Route -->|"Enhanced"| EnhancedFlow[Enhanced Multi-Model Pipeline]
+    Route -->|"Selector"| SelectorFlow[Dynamic Workflow Selector]
     
     BasicFlow --> Execute[Execute Single Workflow]
     EnhancedFlow --> ModelSelect{Model Selection}
     SelectorFlow --> WorkflowSelect{Workflow Selection}
     
-    ModelSelect -->|@model:gpt| GPTWorkflow[GPT-4 Workflow]
-    ModelSelect -->|@model:gemini| GeminiWorkflow[Gemini Flash Workflow]
-    ModelSelect -->|@model:claude| ClaudeWorkflow[Claude Sonnet Workflow]
-    ModelSelect -->|Auto| AutoRoute[Intelligent Auto-Routing]
+    ModelSelect -->|"@model:gpt"| GPTWorkflow[GPT-4 Workflow]
+    ModelSelect -->|"@model:gemini"| GeminiWorkflow[Gemini Flash Workflow]
+    ModelSelect -->|"@model:claude"| ClaudeWorkflow[Claude Sonnet Workflow]
+    ModelSelect -->|"Auto"| AutoRoute[Intelligent Auto-Routing]
     
-    WorkflowSelect -->|Chat| ChatWorkflow[Conversational Workflow]
-    WorkflowSelect -->|Analysis| AnalysisWorkflow[Data Analysis Workflow]
-    WorkflowSelect -->|Creative| CreativeWorkflow[Content Generation Workflow]
+    WorkflowSelect -->|"Chat"| ChatWorkflow[Conversational Workflow]
+    WorkflowSelect -->|"Analysis"| AnalysisWorkflow[Data Analysis Workflow]
+    WorkflowSelect -->|"Creative"| CreativeWorkflow[Content Generation Workflow]
     
     Execute --> Process[Process in LangFlow]
     GPTWorkflow --> Process
@@ -281,22 +281,22 @@ flowchart TD
 
 ```mermaid
 graph TB
-    subgraph "Host Machine"
-        subgraph "Port Mapping"
-            HostPort3000[Host :3000] --> ContainerPort8080[OpenWebUI :8080]
-            HostPort7860[Host :7860] --> ContainerPort7860[LangFlow :7860]
-            HostPort9099[Host :9099] --> ContainerPort9099[Pipelines :9099]
-            HostPort5432[Host :5432] --> ContainerPort5432[PostgreSQL :5432]
+    subgraph HostMachine ["Host Machine"]
+        subgraph PortMapping ["Port Mapping"]
+            HostPort3000["Host Port 3000"] --> ContainerPort8080["OpenWebUI Port 8080"]
+            HostPort7860["Host Port 7860"] --> ContainerPort7860["LangFlow Port 7860"]
+            HostPort9099["Host Port 9099"] --> ContainerPort9099["Pipelines Port 9099"]
+            HostPort5432["Host Port 5432"] --> ContainerPort5432["PostgreSQL Port 5432"]
         end
         
-        subgraph "Docker Internal Network"
-            ContainerPort8080 -.->|DNS: pipelines| ContainerPort9099
-            ContainerPort9099 -.->|DNS: langflow| ContainerPort7860
-            ContainerPort7860 -.->|DNS: postgres| ContainerPort5432
+        subgraph DockerNet ["Docker Internal Network"]
+            ContainerPort8080 -.->|"DNS: pipelines"| ContainerPort9099
+            ContainerPort9099 -.->|"DNS: langflow"| ContainerPort7860
+            ContainerPort7860 -.->|"DNS: postgres"| ContainerPort5432
         end
     end
     
-    subgraph "External Access"
+    subgraph ExtAccess ["External Access"]
         Browser[Web Browser] --> HostPort3000
         LangflowUI[LangFlow UI] --> HostPort7860
         APIClients[API Clients] --> HostPort9099
@@ -382,8 +382,8 @@ graph LR
     LangFlow[LangFlow Logs] --> Docker
     PostgreSQL[PostgreSQL Logs] --> Docker
     
-    Docker --> |docker-compose logs| Console[Console Output]
-    Docker --> |Volume Mount| LogFiles[Log Files]
+    Docker --> |"docker-compose logs"| Console[Console Output]
+    Docker --> |"Volume Mount"| LogFiles[Log Files]
     
     classDef service fill:#e3f2fd
     classDef output fill:#f3e5f5
