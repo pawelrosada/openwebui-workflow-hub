@@ -26,8 +26,9 @@ if [[ "$1" == "--clean" ]]; then
 
     # Remove all langflow-related volumes
     echo -e "${YELLOW}🗑️  Removing all langflow volumes...${NC}"
-    docker volume rm $(docker volume ls -q | grep langflow) 2>/dev/null || true
-
+    docker volume ls -q | grep langflow | while read -r volume; do
+        docker volume rm "$volume" 2>/dev/null || true
+    done
     echo -e "${GREEN}✅ Clean startup - all previous data removed${NC}"
     echo -e "${BLUE}ℹ️  Database will be initialized from scratch${NC}"
 fi
