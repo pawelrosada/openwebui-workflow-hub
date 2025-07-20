@@ -93,16 +93,12 @@ class Pipeline:
         """Odkryj dostępne workflow"""
         import httpx
 
-        excluded = [
-            "Document Q&A",
-            "Simple Agent",
-            "Memory Chatbot",
-            "SaaS Pricing",
-            "Basic Prompting",
-            "Sequential Tasks Agents",
-            "Travel Planning Agents",
-            "Chat with PDF",
-        ]
+        excluded = json.loads(
+            os.getenv(
+                "EXCLUDED_WORKFLOWS",
+                '["Document Q&A", "Simple Agent", "Memory Chatbot", "SaaS Pricing", "Basic Prompting", "Sequential Tasks Agents", "Travel Planning Agents", "Chat with PDF"]'
+            )
+        )
 
         try:
             async with httpx.AsyncClient(timeout=10.0) as client:
