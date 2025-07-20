@@ -28,6 +28,24 @@ This repo provides 3 simple, importable JSON workflows for LangFlow, each using 
 
 Deploy LangFlow to Kubernetes with dedicated PostgreSQL and flexible MCP servers:
 
+#### Option 1: Using Helm Repository (Recommended)
+
+```bash
+# Add the Helm repository
+helm repo add langflow-ui https://pawelrosada.github.io/langflow-ui
+helm repo update
+
+# Install from repository
+helm install my-langflow langflow-ui/langflow-app
+
+# Install with custom values
+helm install my-langflow langflow-ui/langflow-app \
+  --set mcpServers.filesystem-mcp.enabled=true \
+  --set mcpServers.brave-search-mcp.enabled=true
+```
+
+#### Option 2: Using Local Chart
+
 ```bash
 # Basic deployment
 helm install my-langflow ./helm
@@ -175,6 +193,50 @@ For local development, use the provided Docker Compose setup:
 
 ```bash
 ./setup-openwebui.sh
+```
+
+## Helm Chart Development
+
+### Automatic Releases
+
+The Helm chart is automatically released when changes are made to the `helm/` directory:
+
+- **Validation**: Charts are automatically linted and tested on every PR
+- **Release**: Charts are packaged and published to GitHub Pages when changes are merged to `main`
+- **Repository**: Available at https://pawelrosada.github.io/langflow-ui
+
+### Manual Release
+
+You can also trigger a chart release manually using GitHub Actions:
+
+1. Go to the **Actions** tab in the repository
+2. Select **Helm Chart Release** workflow
+3. Click **Run workflow** and select the `main` branch
+4. Click **Run workflow** button
+
+### Chart Versioning
+
+Chart versions are managed through the `helm/Chart.yaml` file. Update the `version` field to release a new version:
+
+```yaml
+apiVersion: v2
+name: langflow-app
+version: 0.3.0  # Increment this for new releases
+```
+
+### Local Testing
+
+Before submitting changes, test your chart locally:
+
+```bash
+# Lint the chart
+helm lint ./helm
+
+# Test template rendering
+helm template test-release ./helm --dry-run
+
+# Validate with values
+helm template test-release ./helm -f ./helm/values.yaml
 ```
 
 ## Contributing

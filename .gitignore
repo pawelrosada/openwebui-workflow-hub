@@ -210,3 +210,7 @@ env/
 
 # Trivy cache
 .trivycache/
+
+# Chart releaser artifacts
+.cr-release-packages/
+charts/
