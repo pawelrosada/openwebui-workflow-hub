@@ -1,6 +1,7 @@
 apiVersion: v2
 name: langflow-app
 description: Helm chart for LangFlow with PostgreSQL, no CPU limits, GKE-ready.
+# Chart version automatically managed by GitHub Actions workflow
 version: 0.2.0
 appVersion: "latest"
 keywords:
