@@ -3,6 +3,7 @@
 ## Table of Contents
 - [Overview](#overview)
 - [Architecture](#architecture)
+- [📋 Detailed Architecture Documentation](./ARCHITECTURE.md)
 - [Components](#components)
 - [Ready-to-Use Blocks](#ready-to-use-blocks)
 - [Installation](#installation)
@@ -18,6 +19,8 @@ A comprehensive integration framework that connects OpenWebUI's intuitive chat i
 The framework bridges the gap between user-friendly chat interfaces and complex AI workflows, enabling developers to create sophisticated AI applications without sacrificing usability or flexibility. Whether you're building customer support bots, content generation tools, or interactive AI assistants, this integration provides all the necessary components in a containerized, scalable architecture.
 
 ## Architecture
+
+> 📋 **For comprehensive technical documentation, component specifications, and advanced architecture patterns, see [ARCHITECTURE.md](./ARCHITECTURE.md)**
 
 ### System Overview
 
