@@ -1,0 +1,30 @@
+# Configuration for Helm Chart Releaser (cr)
+# https://github.com/helm/chart-releaser
+
+# Owner and repository
+owner: pawelrosada
+git-repo: langflow-ui
+
+# Package options
+package-path: .cr-release-packages
+token: ""  # Will be set via CR_TOKEN environment variable
+
+# Release options
+generate-release-notes: true
+make-release-latest: true
+
+# Pages options
+pages-branch: gh-pages
+pages-index-path: index.yaml
+
+# Chart configuration
+charts-repo-url: https://pawelrosada.github.io/langflow-ui
+
+# Skip existing releases
+skip-existing: true
+
+# Release name template (optional)
+# release-name-template: "{{ .Name }}-{{ .Version }}"
+
+# Commit message template
+commit-message: "Release {{ .Name }}-{{ .Version }}"
