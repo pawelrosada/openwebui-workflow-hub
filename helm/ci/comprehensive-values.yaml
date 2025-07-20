@@ -1,0 +1,126 @@
+# Comprehensive test values for full feature testing
+# Tests all major chart features and configurations
+
+# Scale for comprehensive testing
+replicaCount: 2
+
+image:
+  repository: langflowai/langflow
+  tag: "latest"
+  pullPolicy: IfNotPresent
+
+# Service configuration with annotations
+service:
+  type: ClusterIP
+  port: 7860
+  annotations:
+    service.example.com/test: "true"
+
+# Enable ingress for testing
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+  hosts:
+    - host: langflow-test.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+
+# Resource configuration for comprehensive testing
+resources:
+  limits:
+    memory: 2Gi
+  requests:
+    memory: 1Gi
+    cpu: 500m
+
+# PostgreSQL with persistence for comprehensive testing
+postgresql:
+  enabled: true
+  auth:
+    username: langflow_user
+    database: langflow_db
+    enableSuperuserAccess: false
+  primary:
+    persistence:
+      enabled: true
+      size: 2Gi
+    resources:
+      limits:
+        memory: 1Gi
+      requests:
+        memory: 512Mi
+        cpu: 250m
+
+# Enable multiple MCP servers for comprehensive testing
+mcpServers:
+  github-mcp:
+    enabled: true
+    replicas: 1
+    env:
+      - name: GITHUB_PERSONAL_ACCESS_TOKEN
+        value: "test_token_placeholder"
+  
+  filesystem-mcp:
+    enabled: true
+    replicas: 1
+  
+  brave-search-mcp:
+    enabled: false  # Requires API key, skip in testing
+
+# OpenWebUI enabled with PostgreSQL
+openwebui:
+  enabled: true
+  replicaCount: 1
+  database:
+    usePostgreSQL: true
+  resources:
+    limits:
+      memory: 1Gi
+    requests:
+      memory: 512Mi
+      cpu: 250m
+
+# Pod security context for testing
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  runAsGroup: 1000
+  fsGroup: 1000
+
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: false
+  capabilities:
+    drop:
+      - ALL
+
+# Service account configuration
+serviceAccount:
+  create: true
+  annotations:
+    test.example.com/comprehensive: "true"
+
+# Pod annotations for testing
+podAnnotations:
+  test.example.com/comprehensive: "true"
+  prometheus.io/scrape: "false"
+
+# Node selector for testing (commented out to avoid scheduling issues)
+# nodeSelector:
+#   kubernetes.io/os: linux
+
+# Tolerations for testing
+tolerations: []
+
+# Affinity rules for testing
+affinity: {}
+
+# Test-specific secrets
+secrets:
+  create: true
+  langflowSuperuserPassword: "comprehensive_test_123"
+  postgresqlPassword: "comprehensive_db_123"

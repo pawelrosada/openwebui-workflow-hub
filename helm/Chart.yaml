@@ -12,7 +12,15 @@ keywords:
   - mcp
   - gke
   - gcp
+  - kubernetes
+  - helm
+  - openwebui
+icon: https://raw.githubusercontent.com/langflow-ai/langflow/main/docs/static/img/chain.png
 home: https://github.com/pawelrosada/langflow-ui
+sources:
+  - https://github.com/pawelrosada/langflow-ui
+  - https://github.com/langflow-ai/langflow
+  - https://github.com/open-webui/open-webui
 maintainers:
   - name: pawelrosada
     email: pawel@example.com
