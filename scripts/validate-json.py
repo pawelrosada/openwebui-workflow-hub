@@ -93,10 +93,12 @@ def validate_langflow_structure(data, filepath):
                     for handle_field in ["sourceHandle", "targetHandle"]:
                         if handle_field in edge:
                             handle = edge[handle_field]
-                            if isinstance(handle, str) and "œid∶" in handle:
+                            INVALID_UNICODE_SEQUENCE = "id∶"  # Define invalid sequence
+                            # Check for invalid Unicode sequence in handle
+                            if isinstance(handle, str) and INVALID_UNICODE_SEQUENCE in handle:
                                 errors.append(
-                                    f"Edge {i} {handle_field} contains invalid Unicode characters (œid∶)"
-                                )
+                                   f"Edge {i} {handle_field} contains invalid Unicode characters ({INVALID_UNICODE_SEQUENCE})"
+                               )
 
     # Sprawdź metadane
     if "name" in data and not data["name"].strip():
