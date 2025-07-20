@@ -27,33 +27,33 @@ The framework bridges the gap between user-friendly chat interfaces and complex 
 ```mermaid
 graph TB
     User([👤 User]) --> OpenWebUI["🌐 OpenWebUI<br/>Chat Interface<br/>Port 3000"]
-    
+
     OpenWebUI --> |"OpenAI API<br/>HTTP REST"| Pipelines["🔧 Pipelines<br/>Integration Layer<br/>Port 9099"]
-    
+
     Pipelines --> |"HTTP API<br/>JSON"| LangFlow["⚡ LangFlow<br/>Workflow Engine<br/>Port 7860"]
-    
+
     LangFlow --> |SQL| PostgreSQL[("🗄️ PostgreSQL<br/>Database<br/>Port 5432")]
-    
+
     LangFlow --> |"API Calls"| AIModels["🤖 AI Models<br/>GPT-4, Gemini, Claude"]
-    
+
     AIModels --> LangFlow
     LangFlow --> Pipelines
     Pipelines --> OpenWebUI
     OpenWebUI --> User
-    
+
     subgraph DockerNet ["Docker Network"]
         OpenWebUI
         Pipelines
         LangFlow
         PostgreSQL
     end
-    
+
     classDef frontend fill:#e1f5fe
     classDef integration fill:#f3e5f5
     classDef workflow fill:#e8f5e8
     classDef database fill:#fff3e0
     classDef external fill:#fce4ec
-    
+
     class OpenWebUI frontend
     class Pipelines integration
     class LangFlow workflow
@@ -89,7 +89,7 @@ sequenceDiagram
 
 The architecture follows a clean separation of concerns:
 - **Frontend Layer**: OpenWebUI provides the chat interface and user management
-- **Integration Layer**: Custom Python pipelines handle routing and data transformation  
+- **Integration Layer**: Custom Python pipelines handle routing and data transformation
 - **Workflow Layer**: LangFlow manages AI workflows with visual flow builder
 - **Data Layer**: PostgreSQL stores workflow configurations and chat history
 
@@ -131,7 +131,7 @@ Visual AI workflow builder with:
 ### 🗄️ **PostgreSQL Database**
 Persistent storage for:
 - LangFlow workflow configurations and metadata
-- Open WebUI chat conversations and user data  
+- Open WebUI chat conversations and user data
 - Component settings and cache
 - **Shared PostgreSQL instance** with dedicated databases:
   - `langflow` database for LangFlow data
@@ -183,7 +183,7 @@ Persistent storage for:
 
 ### Prerequisites
 - Docker and Docker Compose
-- 4GB+ RAM recommended  
+- 4GB+ RAM recommended
 - Internet connection for model API access
 - **PostgreSQL Database**: Automatically configured via Docker Compose
 
@@ -233,13 +233,13 @@ See [HELM_DEVELOPMENT.md](./HELM_DEVELOPMENT.md) for comprehensive production de
 Both environments (Docker Compose and Helm) use **PostgreSQL** for data persistence:
 
 **Docker Compose:**
-- PostgreSQL server: `postgres:5432`  
+- PostgreSQL server: `postgres:5432`
 - Langflow database: `postgresql://langflow:langflow@postgres:5432/langflow`
 - Open WebUI database: `postgresql://langflow:langflow@postgres:5432/openwebui`
 
 **Environment Variables:**
 - `POSTGRES_DB=langflow` - Primary database name
-- `POSTGRES_USER=langflow` - Database user  
+- `POSTGRES_USER=langflow` - Database user
 - `POSTGRES_PASSWORD=langflow` - Database password (change in production)
 - `DATABASE_URL` - Open WebUI PostgreSQL connection string
 - `LANGFLOW_DATABASE_URL` - Langflow PostgreSQL connection string

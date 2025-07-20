@@ -63,11 +63,11 @@ mcpServers:
     env:
       - name: GITHUB_PERSONAL_ACCESS_TOKEN
         value: "test_token_placeholder"
-  
+
   filesystem-mcp:
     enabled: true
     replicas: 1
-  
+
   brave-search-mcp:
     enabled: false  # Requires API key, skip in testing
 

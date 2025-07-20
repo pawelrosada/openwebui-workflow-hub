@@ -111,7 +111,7 @@ mcpServers:
     secrets: {}  # Add: GITHUB_PERSONAL_ACCESS_TOKEN: "your-token"
     # Reference to existing secret (if secrets.create is false)
     existingSecret: ""  # Name of existing secret containing GITHUB_PERSONAL_ACCESS_TOKEN
-  
+
   # Example MCP server for filesystem operations
   filesystem-mcp:
     enabled: false
@@ -175,7 +175,7 @@ openwebui:
     # Database name for OpenWebUI (will be created in the same PostgreSQL instance)
     name: "openwebui_db"
     # Set to false to use existing PostgreSQL instance configured above
-    # Set to true to deploy separate PostgreSQL for OpenWebUI only  
+    # Set to true to deploy separate PostgreSQL for OpenWebUI only
     separatePostgreSQL: false
 
 # For dynamic configs in Azure/K8s with Helm
@@ -193,15 +193,15 @@ config:
 secrets:
   # Set to true to create secrets from this chart
   create: true
-  
+
   # LangFlow secrets
   langflow:
     superuserPassword: "admin123"  # Only for development - use external secrets in production
-  
+
   # PostgreSQL secrets
   postgresql:
     password: "changeme"  # Only for development
     postgresPassword: "postgres_admin_password"  # Only for development
-  
+
   # Note: In production, set secrets.create=false and use external secret management
   # like External Secrets Operator, Vault, or kubectl to create secrets manually

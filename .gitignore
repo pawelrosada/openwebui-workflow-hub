@@ -214,3 +214,7 @@ env/
 # Chart releaser artifacts
 .cr-release-packages/
 charts/
+
+#pipeline generated files
+pipelines/langflow_*
+pipelines/pipeline_generator/valves.json

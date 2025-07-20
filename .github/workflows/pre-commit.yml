@@ -14,7 +14,7 @@ permissions:
 jobs:
   pre-commit:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -44,7 +44,7 @@ jobs:
         run: |
           # Install Trivy using binary release (more reliable)
           curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
-          
+
           # Verify installations
           trivy --version
           shellcheck --version
@@ -53,30 +53,30 @@ jobs:
         id: precommit
         run: |
           pre-commit install
-          
+
           # Set pip timeout environment variables for pre-commit hooks
           export PIP_DEFAULT_TIMEOUT=60
           export PIP_RETRIES=3
-          
+
           # Try to run pre-commit with error handling
           set +e  # Don't fail immediately on errors
-          
+
           echo "Running pre-commit hooks..."
           pre-commit run --all-files --show-diff-on-failure
           PRECOMMIT_STATUS=$?
-          
+
           if [ $PRECOMMIT_STATUS -ne 0 ]; then
             echo "Pre-commit encountered issues. Status: $PRECOMMIT_STATUS"
-            
+
             # Check if it's a network/installation issue
             if grep -q "TimeoutError\|ReadTimeoutError\|Connection\|Network\|CalledProcessError.*pip.*install" ~/.cache/pre-commit/pre-commit.log 2>/dev/null || [ $PRECOMMIT_STATUS -eq 3 ]; then
               echo "Network connectivity or installation issues detected. Running fallback validation..."
               echo "::warning::Pre-commit hooks failed due to network/installation issues, using fallback validation"
-              
+
               # Run basic validation instead
               chmod +x ./validate-code.sh
               ./validate-code.sh
-              
+
               echo "precommit-failed=network" >> $GITHUB_OUTPUT
               exit 0  # Don't fail the build for network issues
             else
@@ -95,24 +95,24 @@ jobs:
           # Configure git properly for GitHub Actions
           git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          
+
           # Check if there are changes to commit
           if ! git diff --quiet || ! git diff --cached --quiet; then
             echo "Auto-fixing formatting issues..."
             git add -A
-            
+
             # Show what changes we're about to commit
             echo "Changes to be committed:"
             git diff --cached --name-status
-            
+
             # Commit the changes
             if git commit -m "🔧 Auto-fix: Apply pre-commit formatting [skip ci]"; then
               echo "Successfully created auto-fix commit"
-              
+
               # Only push if this is a PR from the same repo (not a fork)
               if [ "${{ github.event_name }}" = "pull_request" ] && [ "${{ github.event.pull_request.head.repo.full_name }}" = "${{ github.repository }}" ]; then
                 echo "Attempting to push auto-fixes to ${{ github.head_ref }}..."
-                
+
                 # Use the proper branch reference for PRs
                 if git push origin HEAD:${{ github.head_ref }}; then
                   echo "✅ Successfully pushed auto-fixes to branch"
@@ -142,7 +142,7 @@ jobs:
         if: always()  # Always run to provide final status
         run: |
           echo "=== Pre-commit CI Final Status ==="
-          
+
           if [ "${{ steps.precommit.outputs.precommit-failed }}" = "false" ]; then
             echo "✅ All pre-commit checks passed successfully"
             echo "::notice::Code quality validation completed successfully"
@@ -153,10 +153,10 @@ jobs:
             echo "❌ Pre-commit validation completed with auto-fixes applied"
             echo "::notice::Code formatting issues were automatically fixed and committed"
           fi
-          
+
           # Run a basic final validation that doesn't rely on network
           echo "Running basic file integrity checks..."
-          
+
           # Check Python syntax
           python_errors=0
           for py_file in $(find . -name "*.py" -not -path "./.git/*" -not -path "./.*" | head -10); do
@@ -165,7 +165,7 @@ jobs:
               python_errors=$((python_errors + 1))
             fi
           done
-          
+
           # Check JSON syntax
           json_errors=0
           for json_file in $(find . -name "*.json" -not -path "./.git/*" | head -5); do
@@ -174,11 +174,11 @@ jobs:
               json_errors=$((json_errors + 1))
             fi
           done
-          
+
           if [ $python_errors -gt 0 ] || [ $json_errors -gt 0 ]; then
             echo "::error::Found $python_errors Python syntax errors and $json_errors JSON syntax errors"
             exit 1
           fi
-          
+
           echo "✅ Basic file integrity checks passed"
           echo "Final validation completed successfully"

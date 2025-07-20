@@ -21,10 +21,16 @@ docker compose down 2>/dev/null || true
 
 # Clean up old volumes if requested
 if [[ "$1" == "--clean" ]]; then
-    echo -e "${YELLOW}🧹 Cleaning up old data volumes...${NC}"
-    docker volume rm langflow-ui_langflow-postgres 2>/dev/null || true
-    docker volume rm langflow-ui_langflow-data 2>/dev/null || true
-    docker volume rm langflow-ui_pipelines 2>/dev/null || true
+    echo -e "${YELLOW}🧹 Cleaning up all data volumes and cached data...${NC}"
+    docker compose down -v 2>/dev/null || true
+
+    # Remove all langflow-related volumes
+    echo -e "${YELLOW}🗑️  Removing all langflow volumes...${NC}"
+    docker volume ls -q | grep langflow | while read -r volume; do
+        docker volume rm "$volume" 2>/dev/null || true
+    done
+    echo -e "${GREEN}✅ Clean startup - all previous data removed${NC}"
+    echo -e "${BLUE}ℹ️  Database will be initialized from scratch${NC}"
 fi
 
 # Create .env file if it doesn't exist
@@ -52,7 +58,7 @@ check_service() {
     # local service=$1  # Service name (unused but kept for clarity)
     local url=$2
     local name=$3
-    
+
     for i in {1..30}; do
         if curl -f -s "$url" > /dev/null 2>&1; then
             echo -e "${GREEN}✅ $name is ready!${NC}"
@@ -67,7 +73,7 @@ check_service() {
 
 # Health checks
 check_service "postgres" "postgresql://langflow:langflow@localhost:5432/langflow" "PostgreSQL"
-check_service "langflow" "http://localhost:7860/health" "Langflow"  
+check_service "langflow" "http://localhost:7860/health" "Langflow"
 check_service "pipelines" "http://localhost:9099/health" "Pipelines"
 check_service "open-webui" "http://localhost:3000/health" "Open WebUI"
 

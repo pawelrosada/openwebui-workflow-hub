@@ -24,7 +24,7 @@ helm lint ./helm --strict
 # Test template rendering with minimal config
 helm template test-release ./helm -f helm/ci/test-values.yaml --dry-run
 
-# Test template rendering with comprehensive config  
+# Test template rendering with comprehensive config
 helm template comprehensive-test ./helm -f helm/ci/comprehensive-values.yaml --dry-run
 
 # Optional: Test installation in local cluster (requires kubectl/kind)

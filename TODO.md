@@ -4,9 +4,9 @@
 
 **Current State**: The repository has a well-structured Helm chart and comprehensive GitHub Actions workflow, but CI/CD pipeline is failing due to configuration and setup issues.
 
-**Chart Status**: ✅ Chart structure is complete and passes validation  
-**Workflow Status**: ✅ Comprehensive workflow exists but needs fixes  
-**Documentation**: ⚠️ Good but needs CI/CD specific improvements  
+**Chart Status**: ✅ Chart structure is complete and passes validation
+**Workflow Status**: ✅ Comprehensive workflow exists but needs fixes
+**Documentation**: ⚠️ Good but needs CI/CD specific improvements
 
 ---
 
@@ -15,9 +15,9 @@
 ### **Critical Priority** 🔴
 
 #### **1. GitHub Repository Settings Configuration**
-**Status**: ❌ Needs Verification  
-**Complexity**: Low  
-**Estimated Time**: 15 minutes  
+**Status**: ❌ Needs Verification
+**Complexity**: Low
+**Estimated Time**: 15 minutes
 
 **Description**: Verify and configure GitHub repository settings for Pages and workflow permissions.
 
@@ -41,15 +41,15 @@ git config --list | grep user
 gh api repos/${{ github.repository }} --jq '.permissions'
 ```
 
-**Dependencies**: None  
+**Dependencies**: None
 **References**: [GitHub Pages Documentation](https://docs.github.com/en/pages/getting-started-with-github-pages)
 
 ---
 
 #### **2. GitHub Token and Secrets Verification**
-**Status**: ❌ Needs Verification  
-**Complexity**: Low  
-**Estimated Time**: 10 minutes  
+**Status**: ❌ Needs Verification
+**Complexity**: Low
+**Estimated Time**: 10 minutes
 
 **Description**: Ensure required tokens and secrets are properly configured for chart releases.
 
@@ -71,7 +71,7 @@ echo "Token exists: ${CR_TOKEN:+YES}"
 gh auth status
 ```
 
-**Dependencies**: Repository Settings Configuration  
+**Dependencies**: Repository Settings Configuration
 
 ---
 
@@ -80,9 +80,9 @@ gh auth status
 ### **High Priority** 🟠
 
 #### **3. Chart Testing Configuration File**
-**Status**: ❌ Missing  
-**Complexity**: Medium  
-**Estimated Time**: 30 minutes  
+**Status**: ❌ Missing
+**Complexity**: Medium
+**Estimated Time**: 30 minutes
 
 **Description**: Create chart-testing configuration file to properly define testing parameters.
 
@@ -111,14 +111,14 @@ check-version-increment: true
 validate-maintainers: false
 ```
 
-**Dependencies**: None  
+**Dependencies**: None
 
 ---
 
 #### **4. Chart Dependencies Configuration**
-**Status**: ⚠️ Needs Review  
-**Complexity**: Medium  
-**Estimated Time**: 20 minutes  
+**Status**: ⚠️ Needs Review
+**Complexity**: Medium
+**Estimated Time**: 20 minutes
 
 **Description**: Review and properly configure chart dependencies if needed.
 
@@ -140,14 +140,14 @@ helm dependency update ./helm
 helm dependency build ./helm
 ```
 
-**Dependencies**: None  
+**Dependencies**: None
 
 ---
 
 #### **5. Workflow Permissions Enhancement**
-**Status**: ⚠️ Needs Review  
-**Complexity**: Low  
-**Estimated Time**: 15 minutes  
+**Status**: ⚠️ Needs Review
+**Complexity**: Low
+**Estimated Time**: 15 minutes
 
 **Description**: Ensure workflow has all necessary permissions for complete CI/CD operations.
 
@@ -157,12 +157,12 @@ helm dependency build ./helm
 3. Verify concurrency settings are appropriate
 4. Test permission effectiveness
 
-**Current Permissions**: ✅ Already configured  
+**Current Permissions**: ✅ Already configured
 **Additional Considerations**:
 - Verify `packages: write` if using container registry
 - Check `deployments: write` for environment deployments
 
-**Dependencies**: Repository Settings Configuration  
+**Dependencies**: Repository Settings Configuration
 
 ---
 
@@ -171,9 +171,9 @@ helm dependency build ./helm
 ### **Medium Priority** 🟡
 
 #### **6. Chart Metadata Enhancement**
-**Status**: ⚠️ Needs Improvement  
-**Complexity**: Low  
-**Estimated Time**: 15 minutes  
+**Status**: ⚠️ Needs Improvement
+**Complexity**: Low
+**Estimated Time**: 15 minutes
 
 **Description**: Enhance Chart.yaml metadata for better chart repository presentation.
 
@@ -198,14 +198,14 @@ sources:
   - https://github.com/langflow-ai/langflow
 ```
 
-**Dependencies**: None  
+**Dependencies**: None
 
 ---
 
 #### **7. Chart Values Validation**
-**Status**: ✅ Good State  
-**Complexity**: Low  
-**Estimated Time**: 10 minutes  
+**Status**: ✅ Good State
+**Complexity**: Low
+**Estimated Time**: 10 minutes
 
 **Description**: Review and validate all chart values for production readiness.
 
@@ -227,7 +227,7 @@ helm lint ./helm
 helm template test ./helm --validate
 ```
 
-**Dependencies**: None  
+**Dependencies**: None
 
 ---
 
@@ -236,9 +236,9 @@ helm template test ./helm --validate
 ### **High Priority** 🟠
 
 #### **8. Chart Testing Values**
-**Status**: ❌ Missing  
-**Complexity**: Medium  
-**Estimated Time**: 45 minutes  
+**Status**: ❌ Missing
+**Complexity**: Medium
+**Estimated Time**: 45 minutes
 
 **Description**: Create test values files for comprehensive chart testing.
 
@@ -261,14 +261,14 @@ mkdir -p helm/ci/
 # Create comprehensive-values.yaml with full feature set
 ```
 
-**Dependencies**: None  
+**Dependencies**: None
 
 ---
 
 #### **9. Integration Testing Enhancement**
-**Status**: ⚠️ Needs Enhancement  
-**Complexity**: High  
-**Estimated Time**: 60 minutes  
+**Status**: ⚠️ Needs Enhancement
+**Complexity**: High
+**Estimated Time**: 60 minutes
 
 **Description**: Enhance integration testing to verify chart functionality in Kubernetes.
 
@@ -292,14 +292,14 @@ kubectl port-forward svc/test-release-langflow-app 7860:7860 &
 curl -f http://localhost:7860/health || exit 1
 ```
 
-**Dependencies**: Chart Testing Configuration File  
+**Dependencies**: Chart Testing Configuration File
 
 ---
 
 #### **10. Linting Rules Enhancement**
-**Status**: ⚠️ Needs Enhancement  
-**Complexity**: Medium  
-**Estimated Time**: 30 minutes  
+**Status**: ⚠️ Needs Enhancement
+**Complexity**: Medium
+**Estimated Time**: 30 minutes
 
 **Description**: Add comprehensive linting rules and validation for chart quality.
 
@@ -321,7 +321,7 @@ helm lint ./helm --strict
 helm template ./helm | kubeval
 ```
 
-**Dependencies**: None  
+**Dependencies**: None
 
 ---
 
@@ -330,9 +330,9 @@ helm template ./helm | kubeval
 ### **High Priority** 🟠
 
 #### **11. Release Automation Fixes**
-**Status**: ❌ Likely Failing  
-**Complexity**: Medium  
-**Estimated Time**: 30 minutes  
+**Status**: ❌ Likely Failing
+**Complexity**: Medium
+**Estimated Time**: 30 minutes
 
 **Description**: Debug and fix chart release automation issues.
 
@@ -356,14 +356,14 @@ cr upload --owner pawelrosada --git-repo langflow-ui --token "$GITHUB_TOKEN"
 cr index --owner pawelrosada --git-repo langflow-ui --charts-repo-url https://pawelrosada.github.io/langflow-ui
 ```
 
-**Dependencies**: GitHub Repository Settings, Chart Testing Configuration  
+**Dependencies**: GitHub Repository Settings, Chart Testing Configuration
 
 ---
 
 #### **12. Workflow Trigger Optimization**
-**Status**: ✅ Good State  
-**Complexity**: Low  
-**Estimated Time**: 15 minutes  
+**Status**: ✅ Good State
+**Complexity**: Low
+**Estimated Time**: 15 minutes
 
 **Description**: Review and optimize workflow triggers for efficiency.
 
@@ -373,29 +373,29 @@ cr index --owner pawelrosada --git-repo langflow-ui --charts-repo-url https://pa
 3. Add proper conditions for PR vs main branch
 4. Verify manual dispatch functionality
 
-**Current Triggers**: Already well configured  
+**Current Triggers**: Already well configured
 **Potential Enhancements**:
 - Add skip conditions for documentation-only changes
 - Optimize path filters
 
-**Dependencies**: None  
+**Dependencies**: None
 
 ---
 
 #### **13. Notification and Status Reporting**
-**Status**: ✅ Good State  
-**Complexity**: Low  
-**Estimated Time**: 10 minutes  
+**Status**: ✅ Good State
+**Complexity**: Low
+**Estimated Time**: 10 minutes
 
 **Description**: Enhance workflow status reporting and notifications.
 
-**Current Status**: Notification job already exists  
+**Current Status**: Notification job already exists
 **Potential Enhancements**:
 - Add Slack/Discord notifications if needed
 - Create deployment status badges
 - Add more detailed success/failure reporting
 
-**Dependencies**: None  
+**Dependencies**: None
 
 ---
 
@@ -404,9 +404,9 @@ cr index --owner pawelrosada --git-repo langflow-ui --charts-repo-url https://pa
 ### **Medium Priority** 🟡
 
 #### **14. CI/CD Documentation**
-**Status**: ❌ Missing  
-**Complexity**: Medium  
-**Estimated Time**: 45 minutes  
+**Status**: ❌ Missing
+**Complexity**: Medium
+**Estimated Time**: 45 minutes
 
 **Description**: Create comprehensive CI/CD documentation for contributors.
 
@@ -431,31 +431,31 @@ cr index --owner pawelrosada --git-repo langflow-ui --charts-repo-url https://pa
 ## Troubleshooting
 ```
 
-**Dependencies**: None  
+**Dependencies**: None
 
 ---
 
 #### **15. Installation Instructions Update**
-**Status**: ✅ Good State  
-**Complexity**: Low  
-**Estimated Time**: 15 minutes  
+**Status**: ✅ Good State
+**Complexity**: Low
+**Estimated Time**: 15 minutes
 
 **Description**: Verify and update Helm installation instructions.
 
-**Current Status**: README already has good installation instructions  
+**Current Status**: README already has good installation instructions
 **Potential Improvements**:
 - Add troubleshooting for installation issues
 - Include prerequisite requirements
 - Add upgrade instructions
 
-**Dependencies**: None  
+**Dependencies**: None
 
 ---
 
 #### **16. Contributing Guidelines Enhancement**
-**Status**: ⚠️ Needs Enhancement  
-**Complexity**: Medium  
-**Estimated Time**: 30 minutes  
+**Status**: ⚠️ Needs Enhancement
+**Complexity**: Medium
+**Estimated Time**: 30 minutes
 
 **Description**: Enhance contributing guidelines specific to Helm chart changes.
 
@@ -471,7 +471,7 @@ cr index --owner pawelrosada --git-repo langflow-ui --charts-repo-url https://pa
 - [ ] Version management is explained
 - [ ] PR template guides contributors
 
-**Dependencies**: None  
+**Dependencies**: None
 
 ---
 
@@ -480,9 +480,9 @@ cr index --owner pawelrosada --git-repo langflow-ui --charts-repo-url https://pa
 ### **Critical Validation Steps**
 
 #### **17. End-to-End Pipeline Test**
-**Status**: ❌ Pending Implementation  
-**Complexity**: High  
-**Estimated Time**: 30 minutes  
+**Status**: ❌ Pending Implementation
+**Complexity**: High
+**Estimated Time**: 30 minutes
 
 **Description**: Perform complete end-to-end test of the CI/CD pipeline.
 
@@ -498,14 +498,14 @@ cr index --owner pawelrosada --git-repo langflow-ui --charts-repo-url https://pa
 - [ ] Chart is accessible via Helm repository
 - [ ] Chart installs correctly from repository
 
-**Dependencies**: All previous items  
+**Dependencies**: All previous items
 
 ---
 
 #### **18. Repository Health Check**
-**Status**: ⚠️ Needs Verification  
-**Complexity**: Low  
-**Estimated Time**: 15 minutes  
+**Status**: ⚠️ Needs Verification
+**Complexity**: Low
+**Estimated Time**: 15 minutes
 
 **Description**: Final verification of repository configuration and health.
 
@@ -529,7 +529,7 @@ helm search repo langflow-ui
 helm install test langflow-ui/langflow-app --dry-run
 ```
 
-**Dependencies**: All previous items  
+**Dependencies**: All previous items
 
 ---
 
@@ -537,7 +537,7 @@ helm install test langflow-ui/langflow-app --dry-run
 
 ### **Phase 1: Critical Foundation** (Start Here)
 1. ✅ GitHub Repository Settings Configuration
-2. ✅ GitHub Token and Secrets Verification  
+2. ✅ GitHub Token and Secrets Verification
 3. ✅ Chart Testing Configuration File
 4. ✅ Release Automation Fixes
 
@@ -619,6 +619,6 @@ helm search repo langflow-ui
 
 ---
 
-*Last Updated: January 2025*  
-*Status: Ready for Implementation*  
+*Last Updated: January 2025*
+*Status: Ready for Implementation*
 *Estimated Total Time: 4-6 hours*

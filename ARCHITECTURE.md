@@ -13,24 +13,24 @@ graph TB
         AIProviders["AI Model Providers: OpenAI, Google, Anthropic"]
         MCPServers["MCP Servers: External Tools & APIs"]
     end
-    
+
     subgraph DockerEnv ["Docker Compose Environment"]
         subgraph FrontLayer ["Frontend Layer"]
             OpenWebUI["OpenWebUI - Port 3000 - Image: ghcr.io/open-webui/open-webui:main"]
         end
-        
+
         subgraph IntLayer ["Integration Layer"]
             Pipelines["Pipelines - Port 9099 - Image: ghcr.io/open-webui/pipelines:main"]
         end
-        
+
         subgraph WorkLayer ["Workflow Layer"]
             LangFlow["LangFlow - Port 7860 - Image: langflowai/langflow:latest"]
         end
-        
+
         subgraph DataLayer ["Data Layer"]
             PostgreSQL["PostgreSQL - Port 5432 - Image: postgres:16"]
         end
-        
+
         subgraph StorageLayer ["Storage Layer"]
             OpenWebUIVol["open-webui volume"]
             PipelinesVol["pipelines volume"]
@@ -38,26 +38,26 @@ graph TB
             PostgreSQLVol["langflow-postgres volume"]
         end
     end
-    
+
     User --> |"HTTPS/HTTP"| OpenWebUI
     OpenWebUI --> |"OpenAI API Format - HTTP REST"| Pipelines
     Pipelines --> |"Custom HTTP API - JSON Payload"| LangFlow
     LangFlow --> |"SQL Queries - PostgreSQL Protocol"| PostgreSQL
     LangFlow --> |"HTTP/HTTPS - API Calls"| AIProviders
     LangFlow --> |"HTTP/WebSocket - MCP Protocol"| MCPServers
-    
+
     OpenWebUI -.-> OpenWebUIVol
     Pipelines -.-> PipelinesVol
     LangFlow -.-> LangFlowVol
     PostgreSQL -.-> PostgreSQLVol
-    
+
     classDef external fill:#ffebee
     classDef frontend fill:#e1f5fe
     classDef integration fill:#f3e5f5
     classDef workflow fill:#e8f5e8
     classDef database fill:#fff3e0
     classDef storage fill:#f9f9f9
-    
+
     class User,AIProviders,MCPServers external
     class OpenWebUI frontend
     class Pipelines integration
@@ -114,11 +114,11 @@ environment:
 1. **Basic Pipeline** (`langflow_pipeline.py`)
    - Simple OpenWebUI ↔ LangFlow bridge
    - Single workflow routing
-   
+
 2. **Enhanced Pipeline** (`enhanced_langflow_pipeline.py`)
    - Multi-model support with dynamic routing
    - User commands (`@model:gemini`, `@model:gpt`)
-   
+
 3. **Workflow Selector** (`workflow_selector_pipeline.py`)
    - Dynamic workflow selection based on input
    - Context-aware routing
@@ -180,20 +180,20 @@ sequenceDiagram
 
     User->>+OW: Send Chat Message
     OW->>+P: "POST /v1/chat/completions<br/>{model, messages, stream: true}"
-    
+
     Note over P: Rate Limiting & Validation
     P->>P: Check Rate Limits
     P->>P: Validate Request Format
-    
+
     P->>+LF: "POST /api/v1/run/{workflow_id}<br/>{input_value: message, stream: true}"
-    
+
     Note over LF: Workflow Execution
     LF->>+DB: SELECT workflow_config
     DB-->>-LF: Workflow Definition
-    
+
     LF->>LF: Initialize Flow Context
     LF->>LF: Process Input Nodes
-    
+
     alt AI Model Node
         LF->>+AI: "API Request (GPT/Gemini/Claude)"
         AI-->>-LF: AI Response
@@ -203,18 +203,18 @@ sequenceDiagram
     else Custom Component
         LF->>LF: Execute Custom Logic
     end
-    
+
     LF->>DB: INSERT conversation_log
     LF->>LF: Process Output Nodes
-    
+
     LF-->>-P: "Stream Response<br/>{data, session_id, message_id}"
-    
+
     Note over P: Response Processing
     P->>P: Format OpenAI Compatible Response
     P->>P: Apply Response Filters
-    
+
     P-->>-OW: "Stream SSE Response<br/>data: {choices: [{delta: {content: ...}}]}"
-    
+
     OW-->>-User: Display Streaming Response
 
     Note over User,MCP: Error Handling Path
@@ -295,13 +295,13 @@ graph LR
     Pipelines[Pipeline Logs] --> Docker
     LangFlow[LangFlow Logs] --> Docker
     PostgreSQL[PostgreSQL Logs] --> Docker
-    
+
     Docker --> |"docker-compose logs"| Console[Console Output]
     Docker --> |"Volume Mount"| LogFiles[Log Files]
-    
+
     classDef service fill:#e3f2fd
     classDef output fill:#f3e5f5
-    
+
     class OpenWebUI,Pipelines,LangFlow,PostgreSQL service
     class Docker,Console,LogFiles output
 ```
