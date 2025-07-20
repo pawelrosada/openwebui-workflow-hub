@@ -40,6 +40,11 @@
 {{- end }}
 {{- if .Values.openwebui.enabled }}
    - OpenWebUI interface available at port {{ .Values.openwebui.service.port }}
+{{- if .Values.openwebui.database.usePostgreSQL }}
+     * Using PostgreSQL database: {{ .Values.openwebui.database.name }} (production-ready)
+{{- else }}
+     * Using SQLite (development only - data will be lost on pod restart)
+{{- end }}
 {{- end }}
 
 3. Default credentials (development only):

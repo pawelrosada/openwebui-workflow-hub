@@ -18,6 +18,28 @@ spec:
         {{- include "langflow-app.selectorLabels" . | nindent 8 }}
         app.kubernetes.io/component: openwebui
     spec:
+      {{- if .Values.openwebui.database.usePostgreSQL }}
+      initContainers:
+        - name: create-openwebui-db
+          image: postgres:16
+          command:
+            - /bin/bash
+            - -c
+            - |
+              echo "Waiting for PostgreSQL to be ready..."
+              until pg_isready -h {{ include "langflow-app.fullname" . }}-postgresql -p 5432 -U {{ .Values.postgresql.auth.username }}; do
+                echo "PostgreSQL is unavailable - sleeping"
+                sleep 2
+              done
+              echo "PostgreSQL is ready - creating OpenWebUI database if it doesn't exist..."
+              PGPASSWORD="$POSTGRES_PASSWORD" createdb -h {{ include "langflow-app.fullname" . }}-postgresql -p 5432 -U {{ .Values.postgresql.auth.username }} {{ .Values.openwebui.database.name }} || echo "Database {{ .Values.openwebui.database.name }} already exists or creation failed - continuing..."
+          env:
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ if .Values.secrets.create }}{{ include "langflow-app.fullname" . }}-secrets{{ else }}{{ .Values.postgresql.auth.existingSecret }}{{ end }}
+                  key: {{ .Values.postgresql.auth.secretKeys.userPasswordKey }}
+      {{- end }}
       containers:
         - name: openwebui
           image: "{{ .Values.openwebui.image.repository }}:{{ .Values.openwebui.image.tag }}"
@@ -27,12 +49,22 @@ spec:
               containerPort: 8080
               protocol: TCP
           env:
-            - name: OPENAI_API_BASE_URL
-              value: "http://{{ include "langflow-app.fullname" . }}-mcp:{{ .Values.mcp.service.port }}/v1"
-            - name: OPENAI_API_KEY
-              value: "mcp-integration-key"
             - name: ENABLE_SIGNUP
               value: "true"
+            {{- if .Values.openwebui.database.usePostgreSQL }}
+            # PostgreSQL configuration for OpenWebUI
+            - name: DATABASE_URL
+              value: "postgresql://{{ .Values.postgresql.auth.username }}:$(POSTGRES_PASSWORD)@{{ include "langflow-app.fullname" . }}-postgresql:5432/{{ .Values.openwebui.database.name }}"
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ if .Values.secrets.create }}{{ include "langflow-app.fullname" . }}-secrets{{ else }}{{ .Values.postgresql.auth.existingSecret }}{{ end }}
+                  key: {{ .Values.postgresql.auth.secretKeys.userPasswordKey }}
+            {{- else }}
+            # SQLite configuration (development only - not recommended for production)
+            - name: DATA_DIR
+              value: "/app/backend/data"
+            {{- end }}
             {{- with .Values.extraEnv }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
@@ -50,12 +82,16 @@ spec:
             periodSeconds: 10
           resources:
             {{- toYaml .Values.openwebui.resources | nindent 12 }}
+          {{- if not .Values.openwebui.database.usePostgreSQL }}
           volumeMounts:
             - name: openwebui-data
               mountPath: /app/backend/data
+          {{- end }}
+      {{- if not .Values.openwebui.database.usePostgreSQL }}
       volumes:
         - name: openwebui-data
           emptyDir: {}
+      {{- end }}
 ---
 apiVersion: v1
 kind: Service

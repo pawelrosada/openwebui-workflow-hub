@@ -138,6 +138,28 @@ mcpServers:
       TOKEN: "your-token"
 ```
 
+### OpenWebUI with PostgreSQL (Production Ready)
+
+By default, OpenWebUI uses SQLite which is not suitable for production. Enable PostgreSQL for persistent, production-ready storage:
+
+```bash
+# Enable OpenWebUI with PostgreSQL (recommended for production)
+helm install my-langflow ./helm \
+  --set openwebui.enabled=true \
+  --set openwebui.database.usePostgreSQL=true
+
+# OpenWebUI with SQLite (development only - data lost on restart)
+helm install my-langflow ./helm \
+  --set openwebui.enabled=true \
+  --set openwebui.database.usePostgreSQL=false
+```
+
+OpenWebUI PostgreSQL configuration:
+- **Database**: `openwebui_db` (automatically created)
+- **Shared PostgreSQL**: Uses same instance as LangFlow
+- **Persistent storage**: Data survives pod restarts
+- **Production ready**: Suitable for production environments
+
 ### Production Best Practices
 
 ✅ **No CPU limits** - Follows Kubernetes best practices for better performance

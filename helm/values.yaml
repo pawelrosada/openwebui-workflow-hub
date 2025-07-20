@@ -168,6 +168,15 @@ openwebui:
       memory: 256Mi
     limits:
       memory: 512Mi
+  # Database configuration for production use
+  database:
+    # Set to true to use PostgreSQL instead of SQLite (recommended for production)
+    usePostgreSQL: true
+    # Database name for OpenWebUI (will be created in the same PostgreSQL instance)
+    name: "openwebui_db"
+    # Set to false to use existing PostgreSQL instance configured above
+    # Set to true to deploy separate PostgreSQL for OpenWebUI only  
+    separatePostgreSQL: false
 
 # For dynamic configs in Azure/K8s with Helm
 extraEnv: []
