@@ -4,7 +4,7 @@ name: Helm Chart Release
 on:
   push:
     branches: [main]
-    paths: 
+    paths:
       - 'helm/**'
       - '.github/workflows/helm-release.yml'
   workflow_dispatch:
@@ -15,7 +15,7 @@ on:
         default: 'false'
         type: boolean
   pull_request:
-    paths: 
+    paths:
       - 'helm/**'
       - '.github/workflows/helm-release.yml'
 

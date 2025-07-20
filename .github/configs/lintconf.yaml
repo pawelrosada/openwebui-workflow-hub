@@ -9,7 +9,7 @@ rules:
     maintainers-required: true
     keywords-recommended: true
     home-recommended: true
-    
+
   # Template validation
   templates:
     # Require resource limits for main containers
@@ -18,7 +18,7 @@ rules:
     security-context-recommended: true
     # Validate service account usage
     service-account-recommended: true
-    
+
   # Values validation
   values:
     # Check for proper defaults

@@ -6,7 +6,7 @@ This repository provides a simple integration between Open WebUI and Langflow us
 
 ### Basic Principles
 - **Use Docker Compose** for all services
-- **Keep it simple** - avoid unnecessary complexity 
+- **Keep it simple** - avoid unnecessary complexity
 - **Document changes** in Polish for better user experience
 - **Test with provided setup script**
 
@@ -58,7 +58,7 @@ Always test changes with the complete stack:
 # Clean start
 ./setup-openwebui.sh --clean
 
-# Regular start  
+# Regular start
 ./setup-openwebui.sh
 
 # Check services

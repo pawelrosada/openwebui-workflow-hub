@@ -60,13 +60,13 @@
 {{- if .Values.secrets.create }}
    WARNING: Using built-in secrets for development only!
    For production, set secrets.create=false and use external secret management:
-   
+
    # Create secrets manually for production
    kubectl create secret generic {{ include "langflow-app.fullname" . }}-secrets \
      --from-literal=langflow-superuser-password=YOUR_SECURE_PASSWORD \
      --from-literal=postgresql-password=YOUR_DB_PASSWORD \
      -n {{ .Release.Namespace }}
-     
+
    # For MCP servers with API keys
    kubectl create secret generic {{ include "langflow-app.fullname" . }}-mcp-github-mcp-secrets \
      --from-literal=GITHUB_PERSONAL_ACCESS_TOKEN=YOUR_GITHUB_TOKEN \
