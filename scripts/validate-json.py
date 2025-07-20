@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-🔍 JSON Validator dla Langflow Workflows
-Sprawdza poprawność składni JSON i struktury workflow.
+🔍 JSON Validator for Langflow Workflows
+Checks JSON syntax and workflow structure correctness.
 """
 
 import json
@@ -12,7 +12,7 @@ from pathlib import Path
 
 
 def validate_json_syntax(filepath):
-    """Sprawdza podstawową składnię JSON"""
+    """Checks basic JSON syntax"""
     try:
         with open(filepath, "r", encoding="utf-8") as f:
             data = json.load(f)
@@ -24,28 +24,28 @@ def validate_json_syntax(filepath):
 
 
 def validate_langflow_structure(data, filepath):
-    """Sprawdza strukturę workflow Langflow"""
+    """Checks Langflow workflow structure"""
     warnings = []
     errors = []
 
-    # Sprawdź podstawową strukturę
+    # Check basic structure
     if not isinstance(data, dict):
         errors.append("Root element must be a dictionary")
         return errors, warnings
 
-    # Sprawdź wymagane pola
+    # Check required fields
     required_fields = ["data", "name", "description"]
     for field in required_fields:
         if field not in data:
             errors.append(f"Missing required field: {field}")
 
-    # Sprawdź strukturę data
+    # Check data structure
     if "data" in data:
         data_section = data["data"]
         if not isinstance(data_section, dict):
             errors.append("'data' field must be a dictionary")
         else:
-            # Sprawdź nodes
+            # Check nodes
             if "nodes" not in data_section:
                 errors.append("Missing 'nodes' in data section")
             elif not isinstance(data_section["nodes"], list):
@@ -55,7 +55,7 @@ def validate_langflow_structure(data, filepath):
                 if len(nodes) == 0:
                     warnings.append("No nodes found in workflow")
 
-                # Sprawdź każdy node
+                # Check each node
                 for i, node in enumerate(nodes):
                     if not isinstance(node, dict):
                         errors.append(f"Node {i} is not a dictionary")
@@ -68,7 +68,7 @@ def validate_langflow_structure(data, filepath):
                                 f"Node {i} missing required field: {req_field}"
                             )
 
-            # Sprawdź edges
+            # Check edges
             if "edges" not in data_section:
                 errors.append("Missing 'edges' in data section")
             elif not isinstance(data_section["edges"], list):
@@ -76,7 +76,7 @@ def validate_langflow_structure(data, filepath):
             else:
                 edges = data_section["edges"]
 
-                # Sprawdź każde połączenie
+                # Check each connection
                 for i, edge in enumerate(edges):
                     if not isinstance(edge, dict):
                         errors.append(f"Edge {i} is not a dictionary")
@@ -89,7 +89,7 @@ def validate_langflow_structure(data, filepath):
                                 f"Edge {i} missing required field: {req_field}"
                             )
 
-                    # Sprawdź czy handles mają poprawny format
+                    # Check if handles have correct format
                     for handle_field in ["sourceHandle", "targetHandle"]:
                         if handle_field in edge:
                             handle = edge[handle_field]
@@ -100,7 +100,7 @@ def validate_langflow_structure(data, filepath):
                                    f"Edge {i} {handle_field} contains invalid Unicode characters ({INVALID_UNICODE_SEQUENCE})"
                                )
 
-    # Sprawdź metadane
+    # Check metadata
     if "name" in data and not data["name"].strip():
         warnings.append("Workflow name is empty")
 
@@ -111,35 +111,35 @@ def validate_langflow_structure(data, filepath):
 
 
 def validate_file(filepath):
-    """Waliduje pojedynczy plik"""
-    print(f"🔍 Sprawdzanie: {filepath}")
+    """Validates a single file"""
+    print(f"🔍 Checking: {filepath}")
 
-    # Sprawdź składnię JSON
+    # Check JSON syntax
     is_valid, data, error = validate_json_syntax(filepath)
     if not is_valid:
         print(f"❌ {filepath}: {error}")
         return False
 
-    # Sprawdź strukturę Langflow
+    # Check Langflow structure
     errors, warnings = validate_langflow_structure(data, filepath)
 
-    # Wyświetl wyniki
+    # Display results
     if errors:
-        print(f"❌ {filepath}: Błędy struktury")
+        print(f"❌ {filepath}: Structure errors")
         for error in errors:
             print(f"   • {error}")
         return False
 
     if warnings:
-        print(f"⚠️  {filepath}: Ostrzeżenia")
+        print(f"⚠️  {filepath}: Warnings")
         for warning in warnings:
             print(f"   • {warning}")
 
-    # Statystyki
+    # Statistics
     if data and "data" in data:
         nodes_count = len(data["data"].get("nodes", []))
         edges_count = len(data["data"].get("edges", []))
-        print(f"✅ {filepath}: OK - {nodes_count} węzłów, {edges_count} połączeń")
+        print(f"✅ {filepath}: OK - {nodes_count} nodes, {edges_count} connections")
     else:
         print(f"✅ {filepath}: OK")
 
@@ -148,35 +148,35 @@ def validate_file(filepath):
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Walidator JSON dla Langflow workflows"
+        description="JSON validator for Langflow workflows"
     )
     parser.add_argument(
-        "files", nargs="*", help="Pliki do sprawdzenia (domyślnie: examples/*.json)"
+        "files", nargs="*", help="Files to check (default: examples/*.json)"
     )
     parser.add_argument(
-        "--strict", action="store_true", help="Traktuj ostrzeżenia jako błędy"
+        "--strict", action="store_true", help="Treat warnings as errors"
     )
 
     args = parser.parse_args()
 
-    # Określ pliki do sprawdzenia
+    # Determine files to check
     if args.files:
         files_to_check = args.files
     else:
-        # Domyślnie sprawdź wszystkie JSON w examples/
+        # By default check all JSON in examples/
         examples_dir = Path("examples")
         if examples_dir.exists():
             files_to_check = list(examples_dir.glob("*.json"))
         else:
-            print("❌ Katalog 'examples' nie istnieje")
+            print("❌ Directory 'examples' does not exist")
             return 1
 
     if not files_to_check:
-        print("❌ Nie znaleziono plików do sprawdzenia")
+        print("❌ No files found to check")
         return 1
 
-    print("🔍 JSON Validator dla Langflow Workflows")
-    print(f"📂 Sprawdzanie {len(files_to_check)} plików...\n")
+    print("🔍 JSON Validator for Langflow Workflows")
+    print(f"📂 Checking {len(files_to_check)} files...\n")
 
     all_valid = True
     valid_files = 0
@@ -187,17 +187,17 @@ def main():
             valid_files += 1
         else:
             all_valid = False
-        print()  # Pusta linia między plikami
+        print()  # Empty line between files
 
-    # Podsumowanie
+    # Summary
     print("=" * 50)
-    print(f"📊 Wyniki: {valid_files}/{len(files_to_check)} plików prawidłowych")
+    print(f"📊 Results: {valid_files}/{len(files_to_check)} files valid")
 
     if all_valid:
-        print("🎉 Wszystkie pliki są poprawne!")
+        print("🎉 All files are correct!")
         return 0
     else:
-        print("❌ Niektóre pliki wymagają poprawy")
+        print("❌ Some files need fixes")
         return 1
 
 
