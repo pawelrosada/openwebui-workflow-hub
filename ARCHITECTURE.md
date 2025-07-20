@@ -9,42 +9,42 @@ The OpenWebUI-LangFlow-MCP Integration Framework is a containerized solution tha
 ```mermaid
 graph TB
     subgraph ExtLayer ["External Layer"]
-        User([👤 User Browser])
-        AIProviders["🌍 AI Model Providers<br/>OpenAI, Google, Anthropic"]
-        MCPServers["🔌 MCP Servers<br/>External Tools & APIs"]
+        User["User Browser"]
+        AIProviders["AI Model Providers: OpenAI, Google, Anthropic"]
+        MCPServers["MCP Servers: External Tools & APIs"]
     end
     
     subgraph DockerEnv ["Docker Compose Environment"]
         subgraph FrontLayer ["Frontend Layer"]
-            OpenWebUI["🌐 OpenWebUI<br/>Port 3000<br/>Image: ghcr.io/open-webui/open-webui:main"]
+            OpenWebUI["OpenWebUI - Port 3000 - Image: ghcr.io/open-webui/open-webui:main"]
         end
         
         subgraph IntLayer ["Integration Layer"]
-            Pipelines["🔧 Pipelines<br/>Port 9099<br/>Image: ghcr.io/open-webui/pipelines:main"]
+            Pipelines["Pipelines - Port 9099 - Image: ghcr.io/open-webui/pipelines:main"]
         end
         
-        subgraph WorkLayer ["Workflow Layer"] 
-            LangFlow["⚡ LangFlow<br/>Port 7860<br/>Image: langflowai/langflow:latest"]
+        subgraph WorkLayer ["Workflow Layer"]
+            LangFlow["LangFlow - Port 7860 - Image: langflowai/langflow:latest"]
         end
         
         subgraph DataLayer ["Data Layer"]
-            PostgreSQL[("🗄️ PostgreSQL<br/>Port 5432<br/>Image: postgres:16")]
+            PostgreSQL["PostgreSQL - Port 5432 - Image: postgres:16"]
         end
         
-        subgraph Storage
-            OpenWebUIVol["💾 open-webui volume"]
-            PipelinesVol["💾 pipelines volume"]
-            LangFlowVol["💾 langflow-data volume"]
-            PostgreSQLVol["💾 langflow-postgres volume"]
+        subgraph StorageLayer ["Storage Layer"]
+            OpenWebUIVol["open-webui volume"]
+            PipelinesVol["pipelines volume"]
+            LangFlowVol["langflow-data volume"]
+            PostgreSQLVol["langflow-postgres volume"]
         end
     end
     
     User --> |"HTTPS/HTTP"| OpenWebUI
-    OpenWebUI --> |"OpenAI API Format<br/>HTTP REST"| Pipelines
-    Pipelines --> |"Custom HTTP API<br/>JSON Payload"| LangFlow
-    LangFlow --> |"SQL Queries<br/>PostgreSQL Protocol"| PostgreSQL
-    LangFlow --> |"HTTP/HTTPS<br/>API Calls"| AIProviders
-    LangFlow --> |"HTTP/WebSocket<br/>MCP Protocol"| MCPServers
+    OpenWebUI --> |"OpenAI API Format - HTTP REST"| Pipelines
+    Pipelines --> |"Custom HTTP API - JSON Payload"| LangFlow
+    LangFlow --> |"SQL Queries - PostgreSQL Protocol"| PostgreSQL
+    LangFlow --> |"HTTP/HTTPS - API Calls"| AIProviders
+    LangFlow --> |"HTTP/WebSocket - MCP Protocol"| MCPServers
     
     OpenWebUI -.-> OpenWebUIVol
     Pipelines -.-> PipelinesVol
@@ -224,92 +224,6 @@ sequenceDiagram
         P-->>OW: "HTTP 500 + Error Details"
         OW-->>User: User-Friendly Error Message
     end
-```
-
-### Workflow Execution Flow
-
-```mermaid
-flowchart TD
-    Start([Request Received]) --> Parse[Parse Input Message]
-    Parse --> Route{Routing Logic}
-    
-    Route -->|"Basic"| BasicFlow[Basic Langflow Pipeline]
-    Route -->|"Enhanced"| EnhancedFlow[Enhanced Multi-Model Pipeline]
-    Route -->|"Selector"| SelectorFlow[Dynamic Workflow Selector]
-    
-    BasicFlow --> Execute[Execute Single Workflow]
-    EnhancedFlow --> ModelSelect{Model Selection}
-    SelectorFlow --> WorkflowSelect{Workflow Selection}
-    
-    ModelSelect -->|"@model:gpt"| GPTWorkflow[GPT-4 Workflow]
-    ModelSelect -->|"@model:gemini"| GeminiWorkflow[Gemini Flash Workflow]
-    ModelSelect -->|"@model:claude"| ClaudeWorkflow[Claude Sonnet Workflow]
-    ModelSelect -->|"Auto"| AutoRoute[Intelligent Auto-Routing]
-    
-    WorkflowSelect -->|"Chat"| ChatWorkflow[Conversational Workflow]
-    WorkflowSelect -->|"Analysis"| AnalysisWorkflow[Data Analysis Workflow]
-    WorkflowSelect -->|"Creative"| CreativeWorkflow[Content Generation Workflow]
-    
-    Execute --> Process[Process in LangFlow]
-    GPTWorkflow --> Process
-    GeminiWorkflow --> Process
-    ClaudeWorkflow --> Process
-    AutoRoute --> Process
-    ChatWorkflow --> Process
-    AnalysisWorkflow --> Process
-    CreativeWorkflow --> Process
-    
-    Process --> Store[Store in PostgreSQL]
-    Store --> Format[Format Response]
-    Format --> Stream[Stream to OpenWebUI]
-    Stream --> End([Response Complete])
-    
-    classDef decision fill:#fff2cc
-    classDef process fill:#d5e8d4
-    classDef workflow fill:#e1d5e7
-    classDef endpoint fill:#dae8fc
-    
-    class Route,ModelSelect,WorkflowSelect decision
-    class Parse,Execute,Process,Store,Format,Stream process
-    class BasicFlow,EnhancedFlow,SelectorFlow,GPTWorkflow,GeminiWorkflow,ClaudeWorkflow,AutoRoute,ChatWorkflow,AnalysisWorkflow,CreativeWorkflow workflow
-    class Start,End endpoint
-```
-
-## Network Architecture
-
-### Docker Network Topology
-
-```mermaid
-graph TB
-    subgraph HostMachine ["Host Machine"]
-        subgraph PortMapping ["Port Mapping"]
-            HostPort3000["Host Port 3000"] --> ContainerPort8080["OpenWebUI Port 8080"]
-            HostPort7860["Host Port 7860"] --> ContainerPort7860["LangFlow Port 7860"]
-            HostPort9099["Host Port 9099"] --> ContainerPort9099["Pipelines Port 9099"]
-            HostPort5432["Host Port 5432"] --> ContainerPort5432["PostgreSQL Port 5432"]
-        end
-        
-        subgraph DockerNet ["Docker Internal Network"]
-            ContainerPort8080 -.->|"DNS: pipelines"| ContainerPort9099
-            ContainerPort9099 -.->|"DNS: langflow"| ContainerPort7860
-            ContainerPort7860 -.->|"DNS: postgres"| ContainerPort5432
-        end
-    end
-    
-    subgraph ExtAccess ["External Access"]
-        Browser[Web Browser] --> HostPort3000
-        LangflowUI[LangFlow UI] --> HostPort7860
-        APIClients[API Clients] --> HostPort9099
-        DBClients[DB Clients] --> HostPort5432
-    end
-    
-    classDef host fill:#e8f4fd
-    classDef container fill:#f0f8ff
-    classDef external fill:#fff5f5
-    
-    class HostPort3000,HostPort7860,HostPort9099,HostPort5432 host
-    class ContainerPort8080,ContainerPort7860,ContainerPort9099,ContainerPort5432 container
-    class Browser,LangflowUI,APIClients,DBClients external
 ```
 
 ## API Specifications
