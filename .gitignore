@@ -221,3 +221,6 @@ charts/
 #pipeline generated files
 pipelines/langflow_*
 pipelines/pipeline_generator/valves.json
+~/
+.task/
+.venv

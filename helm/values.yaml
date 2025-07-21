@@ -89,7 +89,7 @@ postgresql:
 mcpServers:
   # Example MCP server for GitHub integration
   github-mcp:
-    enabled: true
+    enabled: false
     replicas: 1
     image:
       repository: modelcontextprotocol/server-github
@@ -167,7 +167,7 @@ openwebui:
     requests:
       memory: 256Mi
     limits:
-      memory: 512Mi
+      memory: 1024Mi
   # Database configuration for production use
   database:
     # Set to true to use PostgreSQL instead of SQLite (recommended for production)

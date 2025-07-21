@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "langflow-app.fullname" . }}-pipelines-config
+  labels:
+    {{- include "langflow-app.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "-5"
+data:
+  # This ConfigMap will be populated by the setup script or CI/CD
+  # Run: kubectl create configmap langflow-app-pipelines-config --from-file=pipelines/ --dry-run=client -o yaml | kubectl apply -f -
+  placeholder: |
+    # This file will be replaced by actual pipeline files
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "langflow-app.fullname" . }}-pipelines-requirements
+  labels:
+    {{- include "langflow-app.labels" . | nindent 4 }}
+data:
+  requirements.txt: |
+    requests
+    httpx
+    pydantic

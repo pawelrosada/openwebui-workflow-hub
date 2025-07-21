@@ -59,32 +59,6 @@ postgresql:
       limits:
         memory: 256Mi
 
-# Enable MCP GitHub server for development
-mcpServers:
-  github-mcp:
-    enabled: true
-    replicas: 1
-    service:
-      type: NodePort
-      port: 9099
-      nodePort: 30002  # Maps to host port 9099 via Kind config
-    resources:
-      requests:
-        memory: 128Mi
-        cpu: 100m
-      limits:
-        memory: 256Mi
-    env:
-      - name: GITHUB_REPO_OWNER
-        value: "pawelrosada"  # Development repo owner
-    secrets:
-      GITHUB_PERSONAL_ACCESS_TOKEN: ""  # Set via environment or secrets
-  
-  filesystem-mcp:
-    enabled: false  # Disable for minimal setup
-  
-  brave-search-mcp:
-    enabled: false  # Disable for minimal setup
 
 # Enable OpenWebUI for complete development stack
 openwebui:
@@ -102,11 +76,37 @@ openwebui:
       memory: 128Mi
       cpu: 100m
     limits:
-      memory: 256Mi
+      memory: 2048Mi
   database:
     usePostgreSQL: true
     name: "openwebui_db"
     separatePostgreSQL: false  # Use shared PostgreSQL
+
+# Enable Pipelines for Open WebUI integration
+pipelines:
+  enabled: true
+  replicas: 1
+  image:
+    repository: ghcr.io/open-webui/pipelines
+    tag: "main"
+    pullPolicy: Always
+  service:
+    type: NodePort
+    port: 9099
+    nodePort: 30002  # Maps to host port 9099 via Kind config
+  resources:
+    requests:
+      memory: 512Mi
+      cpu: 100m
+    limits:
+      memory: 1Gi
+  persistence:
+    enabled: true
+    accessModes:
+      - ReadWriteOnce
+    size: 1Gi
+    # storageClass: ""  # Use default storage class in Kind
+  env: []
 
 # Development configuration
 config:
@@ -122,6 +122,8 @@ secrets:
   postgresql:
     password: "devpassword"
     postgresPassword: "devpassword"
+  pipelines:
+    apiKey: "0p3n-w3bu"
 
 # No resource restrictions for development
 nodeSelector: {}

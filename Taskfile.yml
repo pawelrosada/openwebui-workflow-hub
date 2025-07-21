@@ -18,6 +18,99 @@ env:
   KUBECONFIG: ~/.kube/config
 
 tasks:
+  default:
+    desc: Show getting started guide and available commands
+    summary: |
+      🚀 Welcome to Langflow-UI Development Platform!
+
+      This guide will walk you through setting up a complete development environment
+      with OpenWebUI, Langflow, and 25+ AI pipelines on Kubernetes.
+    silent: true
+    cmds:
+      - echo "🚀 Langflow-UI Development Platform"
+      - echo "=================================="
+      - echo ""
+      - echo "📋 Quick Start Guide:"
+      - echo ""
+      - echo "1️⃣  First-time setup (installs tools + creates cluster):"
+      - echo "    task setup"
+      - echo ""
+      - echo "2️⃣  Start development environment:"
+      - echo "    task start"
+      - echo ""
+      - echo "3️⃣  Deploy applications:"
+      - echo "    task deploy"
+      - echo ""
+      - echo "4️⃣  Check everything is running:"
+      - echo "    task status"
+      - echo ""
+      - echo "🌐 Access your applications"
+      - echo "   \- OpenWebUI (Chat Interface) http://localhost:3000"
+      - echo "   - Langflow (Workflow Builder) http://localhost:7860"
+      - echo "   - Pipelines (API) http://localhost:9099"
+      - echo ""
+      - echo "🔧 Pipeline Development:"
+      - echo "   - Update pipelines task update-pipelines"
+      - echo "   - Check pipeline status task pipelines-status"
+      - echo "   - View pipeline logs task pipelines-logs"
+      - echo ""
+      - echo "🛠️  Daily Commands:"
+      - echo "   - task up          - Start everything (setup + start + deploy)"
+      - echo "   - task status      - Show all service status"
+      - echo "   - task logs        - View application logs"
+      - echo "   - task stop        - Stop environment"
+      - echo "   - task restart     - Restart everything"
+      - echo ""
+      - echo "📖 For more commands run task --list"
+      - echo ""
+      - echo "🚀 Ready to start? Run task setup"
+
+  help:
+    desc: "Alias for default task"
+    cmds:
+      - task: default
+
+  quickstart:
+    desc: Complete setup and deployment in one command
+    summary: |
+      🚀 Complete end-to-end setup for new developers:
+      - Installs required tools (Kind, Helm, kubectl)
+      - Creates Kind cluster with proper port mappings
+      - Deploys all applications (OpenWebUI, Langflow, Pipelines, PostgreSQL)
+      - Updates pipelines with latest code
+      - Shows final status and access URLs
+
+      Perfect for first-time setup or clean environment recreation.
+    cmds:
+      - echo "🚀 Starting complete Langflow-UI setup..."
+      - echo ""
+      - task: setup
+      - echo ""
+      - echo "⏳ Waiting for cluster to be ready..."
+      - sleep 5
+      - task: start
+      - echo ""
+      - task: deploy
+      - echo ""
+      - echo "🔧 Setting up pipelines..."
+      - task: update-pipelines
+      - echo ""
+      - task: status
+      - echo ""
+      - echo "🎉 Setup complete! Your Langflow-UI platform is ready!"
+      - echo ""
+      - echo "🌐 Access your applications:"
+      - echo "   - OpenWebUI http://localhost:3000"
+      - echo "   - Langflow http://localhost:7860"
+      - echo "   - Pipelines http://localhost:9099"
+      - echo ""
+      - echo "💡 Next steps:"
+      - echo "   1. Open OpenWebUI at http://localhost:3000"
+      - echo "   2. Create an account or sign in"
+      - echo "   3. Try the '🔧 Pipeline Generator' model"
+      - echo "   4. Explore 25+ available AI pipelines!"
+      - echo ""
+      - echo "📖 For pipeline development task pipelines-status"
   setup:
     desc: Initial environment setup (install tools, create cluster, setup ingress)
     summary: |
@@ -294,3 +387,55 @@ tasks:
     desc: "Alias for 'task shell'"
     cmds:
       - task: shell
+
+  # Pipeline Management
+  update-pipelines:
+    desc: Update pipelines in the Kubernetes cluster
+    summary: |
+      Updates the pipelines ConfigMap with current pipeline files:
+      - Creates ConfigMap from pipelines/ directory
+      - Restarts pipelines deployment to load changes
+      - Shows status after update
+    cmds:
+      - echo "🔧 Updating pipelines ConfigMap..."
+      - ./scripts/update-pipelines.sh
+      - echo "🔄 Restarting pipelines deployment..."
+      - kubectl rollout restart deployment/{{.APP_NAME}}-pipelines -n {{.NAMESPACE}}
+      - kubectl rollout status deployment/{{.APP_NAME}}-pipelines -n {{.NAMESPACE}} --timeout=120s
+      - echo "✅ Pipelines updated successfully!"
+      - task: pipelines-status
+    sources:
+      - pipelines/**/*
+      - scripts/update-pipelines.sh
+
+  pipelines-status:
+    desc: Show pipelines status and available models
+    summary: |
+      Displays current status of pipelines service:
+      - Pod status and logs
+      - Available pipeline models
+      - Service endpoints
+    cmds:
+      - echo "📊 Pipelines Pod Status:"
+      - kubectl get pods -l app.kubernetes.io/component=pipelines -n {{.NAMESPACE}}
+      - echo ""
+      - echo "📋 Recent Pipelines Logs:"
+      - kubectl logs -l app.kubernetes.io/component=pipelines -n {{.NAMESPACE}} --tail=10 --prefix=true || true
+      - echo ""
+      - echo "🔧 Available Pipeline Models:"
+      - |
+        POD=$(kubectl get pod -l app.kubernetes.io/component=pipelines -n {{.NAMESPACE}} -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || echo "")
+        if [ -n "$POD" ]; then
+          kubectl exec $POD -n {{.NAMESPACE}} -- curl -s -H "Authorization: Bearer 0p3n-w3bu" http://localhost:9099/v1/models 2>/dev/null | jq -r '.data[]? | "- " + .name' 2>/dev/null || echo "❌ Could not fetch models"
+        else
+          echo "❌ No pipelines pod found"
+        fi
+
+  pipelines-logs:
+    desc: Follow pipelines logs
+    summary: |
+      Shows real-time logs from pipelines service:
+      - Follows logs from all pipelines pods
+      - Useful for debugging pipeline issues
+    cmds:
+      - kubectl logs -f -l app.kubernetes.io/component=pipelines -n {{.NAMESPACE}} --prefix=true

@@ -51,10 +51,23 @@ spec:
           env:
             - name: ENABLE_SIGNUP
               value: "true"
+            {{- if .Values.pipelines.enabled }}
+            # Pipelines integration for OpenWebUI
+            - name: OPENAI_API_BASE_URL
+              value: "http://{{ include "langflow-app.fullname" . }}-pipelines:{{ .Values.pipelines.service.port }}/v1"
+            - name: OPENAI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ if .Values.secrets.create }}{{ include "langflow-app.fullname" . }}-secrets{{ else }}{{ .Values.pipelines.existingSecret }}{{ end }}
+                  key: pipelines-api-key
+            {{- end }}
             {{- if .Values.openwebui.database.usePostgreSQL }}
             # PostgreSQL configuration for OpenWebUI
             - name: DATABASE_URL
-              value: "postgresql://{{ .Values.postgresql.auth.username }}:$(POSTGRES_PASSWORD)@{{ include "langflow-app.fullname" . }}-postgresql:5432/{{ .Values.openwebui.database.name }}"
+              valueFrom:
+                secretKeyRef:
+                  name: {{ if .Values.secrets.create }}{{ include "langflow-app.fullname" . }}-secrets{{ else }}{{ .Values.postgresql.auth.existingSecret }}{{ end }}
+                  key: openwebui-database-url
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
@@ -107,6 +120,9 @@ spec:
       targetPort: http
       protocol: TCP
       name: http
+      {{- if and (eq .Values.openwebui.service.type "NodePort") .Values.openwebui.service.nodePort }}
+      nodePort: {{ .Values.openwebui.service.nodePort }}
+      {{- end }}
   selector:
     {{- include "langflow-app.selectorLabels" . | nindent 4 }}
     app.kubernetes.io/component: openwebui

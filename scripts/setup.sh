@@ -33,20 +33,20 @@ check_command() {
 # Function to install missing tools
 install_missing_tools() {
     local missing_tools=()
-    
+
     # Check required tools
     echo -e "${BLUE}📦 Checking required tools...${NC}"
-    
+
     check_command "docker" || missing_tools+=("docker")
     check_command "kind" || missing_tools+=("kind")
     check_command "helm" || missing_tools+=("helm")
     check_command "kubectl" || missing_tools+=("kubectl")
     check_command "task" || missing_tools+=("task")
-    
+
     if [[ ${#missing_tools[@]} -gt 0 ]]; then
         echo -e "${YELLOW}⚠️  Missing tools detected: ${missing_tools[*]}${NC}"
         echo -e "${BLUE}🔧 Attempting to install missing tools...${NC}"
-        
+
         # Install based on OS
         if [[ "$OSTYPE" == "linux-gnu"* ]]; then
             for tool in "${missing_tools[@]}"; do
@@ -102,7 +102,7 @@ check_docker() {
 # Function to create Kind cluster
 create_cluster() {
     echo -e "${BLUE}🎯 Setting up Kind cluster...${NC}"
-    
+
     # Check if cluster already exists
     if kind get clusters | grep -q "^${CLUSTER_NAME}$"; then
         echo -e "${YELLOW}⚠️  Cluster '$CLUSTER_NAME' already exists${NC}"
@@ -116,58 +116,54 @@ create_cluster() {
             return 0
         fi
     fi
-    
+
     # Create cluster
     echo -e "${BLUE}🏗️  Creating Kind cluster with name '$CLUSTER_NAME'...${NC}"
     kind create cluster --config="$PROJECT_ROOT/kind-config.yaml" --name="$CLUSTER_NAME"
-    
+
     # Wait for cluster to be ready
     echo -e "${BLUE}⏳ Waiting for cluster to be ready...${NC}"
     kubectl wait --for=condition=Ready nodes --all --timeout=300s
-    
+
     echo -e "${GREEN}✅ Kind cluster created successfully${NC}"
 }
 
 # Function to setup Helm repositories
 setup_helm() {
     echo -e "${BLUE}📚 Setting up Helm repositories...${NC}"
-    
+
     # Add Bitnami repository for PostgreSQL
     helm repo add bitnami https://charts.bitnami.com/bitnami
-    
+
     # Add ingress-nginx for ingress controller
     helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
-    
+
     # Update repositories
     helm repo update
-    
+
     echo -e "${GREEN}✅ Helm repositories configured${NC}"
 }
 
 # Function to install ingress controller
 setup_ingress() {
     echo -e "${BLUE}🌐 Installing ingress controller...${NC}"
-    
+
     # Install ingress-nginx for Kind
     helm upgrade --install ingress-nginx ingress-nginx/ingress-nginx \
         --namespace ingress-nginx \
         --create-namespace \
         --set controller.service.type=NodePort \
         --set controller.watchIngressWithoutClass=true \
-        --set controller.nodeSelector."ingress-ready"=true \
-        --set controller.tolerations[0].key=node-role.kubernetes.io/control-plane \
-        --set controller.tolerations[0].operator=Equal \
-        --set controller.tolerations[0].effect=NoSchedule \
-        --set controller.tolerations[0].tolerations[1].key=node-role.kubernetes.io/master \
-        --set controller.tolerations[0].tolerations[1].operator=Equal \
-        --set controller.tolerations[0].tolerations[1].effect=NoSchedule
-    
+        --set 'controller.tolerations[0].key=node-role.kubernetes.io/control-plane' \
+        --set 'controller.tolerations[0].operator=Equal' \
+        --set 'controller.tolerations[0].effect=NoSchedule'
+
     # Wait for ingress controller to be ready
     kubectl wait --namespace ingress-nginx \
         --for=condition=ready pod \
         --selector=app.kubernetes.io/component=controller \
         --timeout=90s
-    
+
     echo -e "${GREEN}✅ Ingress controller installed${NC}"
 }
 
@@ -193,7 +189,7 @@ show_next_steps() {
 # Main execution
 main() {
     cd "$PROJECT_ROOT"
-    
+
     install_missing_tools
     check_docker
     create_cluster

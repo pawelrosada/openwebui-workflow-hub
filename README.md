@@ -439,6 +439,164 @@ Both environments (Docker Compose and Helm) use **PostgreSQL** for data persiste
 - `DATABASE_URL` - Open WebUI PostgreSQL connection string
 - `LANGFLOW_DATABASE_URL` - Langflow PostgreSQL connection string
 
+## Pipeline Management
+
+### Overview
+The framework includes **26 pre-built pipelines** that automatically connect OpenWebUI to Langflow workflows. These pipelines act as intelligent intermediaries, handling data transformation, rate limiting, and workflow orchestration.
+
+### Available Pipelines
+- **🔧 Pipeline Generator** - Automatically creates new pipelines from Langflow workflows
+- **📝 Content Creation**: Blog Writer, Instagram Copywriter, Twitter Thread Generator
+- **🔍 Research & Analysis**: Research Agent, Market Research, Financial Report Parser
+- **💬 Communication**: Meeting Summary, News Aggregator, Invoice Summarizer
+- **🤖 AI Integration**: OpenAI, Text/Image Sentiment Analysis, SEO Keyword Generator
+- **📊 Data Processing**: Vector Store RAG, Hybrid Search RAG, Custom Component Generator
+- **🎯 Specialized Agents**: Search Agent, Social Media Agent, Pokédex Agent, Price Deal Finder
+
+### Pipeline Development Workflow
+
+#### Using Kubernetes (Recommended for Development)
+
+```bash
+# 1. Modify pipeline files in pipelines/ directory
+vim pipelines/langflow_custom_pipeline.py
+
+# 2. Update pipelines in cluster
+task update-pipelines
+
+# 3. Check pipeline status
+task pipelines-status
+
+# 4. View real-time pipeline logs
+task pipelines-logs
+```
+
+#### Manual Pipeline Update
+```bash
+# Create/update ConfigMap from local files
+./scripts/update-pipelines.sh
+
+# Restart pipelines deployment
+kubectl rollout restart deployment langflow-app-pipelines
+
+# Verify all pipelines loaded
+kubectl exec deployment/langflow-app-pipelines --
+  curl -s -H "Authorization: Bearer 0p3n-w3bu"
+  http://localhost:9099/v1/models | jq '.data | length'
+```
+
+### Pipeline Generator Usage
+
+The **Pipeline Generator** is a special pipeline that automatically creates new pipeline files from Langflow workflows:
+
+1. **Access Pipeline Generator**: Available as "🔧 Pipeline Generator" model in OpenWebUI
+2. **Automatic Discovery**: On startup, scans Langflow for available workflows
+3. **Dynamic Generation**: Creates Python pipeline files for each workflow found
+4. **Persistent Storage**: Generated pipelines survive pod restarts via PersistentVolume
+
+#### Pipeline Generator Features
+- **Auto-discovery** of Langflow workflows via API
+- **Template-based generation** with consistent structure
+- **Rate limiting** and error handling built-in
+- **Persistent storage** for generated pipeline files
+- **Automatic reload** when new workflows are added
+
+### Pipeline Architecture
+
+```mermaid
+graph TB
+    OpenWebUI["🌐 OpenWebUI"] --> |"HTTP Request"| Pipelines["🔧 Pipelines Service"]
+
+    subgraph Pipelines ["🔧 Pipelines Container"]
+        Generator["🔧 Pipeline Generator"]
+        Pipeline1["📝 Blog Writer"]
+        Pipeline2["🔍 Research Agent"]
+        PipelineN["... 25+ Pipelines"]
+    end
+
+    Pipelines --> |"Workflow Execution"| Langflow["⚡ Langflow"]
+
+    subgraph Storage ["💾 Persistent Storage"]
+        PVC["PersistentVolumeClaim"]
+        ConfigMap["Pipeline Files ConfigMap"]
+    end
+
+    ConfigMap --> |"Init Container"| Pipelines
+    Pipelines --> |"Generated Files"| PVC
+```
+
+### Custom Pipeline Development
+
+#### 1. Create New Pipeline
+```python
+# pipelines/my_custom_pipeline.py
+"""
+Custom Pipeline Example
+"""
+from typing import List, Dict, Union, Generator
+import httpx
+import os
+
+class Pipeline:
+    def __init__(self):
+        self.name = "My Custom Pipeline"
+        self.id = "my_custom_pipeline"
+
+    async def on_startup(self):
+        print(f"Pipeline started: {self.name}")
+
+    def pipe(
+        self, user_message: str, model_id: str,
+        messages: List[dict], body: dict
+    ) -> Union[str, Generator, Iterator]:
+        # Your custom logic here
+        langflow_url = os.getenv("LANGFLOW_BASE_URL", "http://langflow-app:7860")
+
+        # Call Langflow workflow
+        response = httpx.post(
+            f"{langflow_url}/api/v1/run/your-workflow-id",
+            json={"input_value": user_message}
+        )
+
+        return response.json()["outputs"][0]["outputs"][0]["results"]["message"]["text"]
+```
+
+#### 2. Deploy Custom Pipeline
+```bash
+# Update cluster with new pipeline
+task update-pipelines
+
+# Verify it's loaded
+task pipelines-status
+```
+
+### Troubleshooting Pipelines
+
+#### Common Issues
+```bash
+# Check pipeline pod status
+kubectl get pods -l app.kubernetes.io/component=pipelines
+
+# View pipeline logs
+kubectl logs -l app.kubernetes.io/component=pipelines
+
+# Test individual pipeline
+kubectl exec deployment/langflow-app-pipelines --
+  curl -s -H "Authorization: Bearer 0p3n-w3bu"
+  "http://localhost:9099/v1/models" | jq '.data[] | select(.id=="my_pipeline")'
+
+# Check persistent storage
+kubectl exec deployment/langflow-app-pipelines -- ls -la /app/pipelines/
+```
+
+#### Pipeline Debugging
+- **Rate Limiting**: Check if requests are being throttled
+- **Langflow Connection**: Verify LANGFLOW_BASE_URL environment variable
+- **API Authentication**: Ensure pipelines-api-key secret is correct
+- **Persistent Storage**: Confirm PersistentVolumeClaim is bound and writable
+
+## Contributing
+
 ### API Configuration
 - `OPENAI_API_KEY`: API keys for model access
 - `PIPELINES_API_KEY=0p3n-w3bu`: Pipeline authentication token
