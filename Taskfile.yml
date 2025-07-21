@@ -1,0 +1,296 @@
+version: '3'
+
+# Main Taskfile for Langflow-UI Development Platform
+# Provides automation for Kind cluster management and application deployment
+
+vars:
+  CLUSTER_NAME: langflow-dev
+  APP_NAME: langflow-app
+  NAMESPACE: default
+  RELEASE_NAME: langflow-app
+
+# Include specialized taskfiles
+includes:
+  expose: ./taskfiles/expose.yml
+
+# Global environment variables
+env:
+  KUBECONFIG: ~/.kube/config
+
+tasks:
+  setup:
+    desc: Initial environment setup (install tools, create cluster, setup ingress)
+    summary: |
+      Performs one-time setup of the development environment:
+      - Checks and installs required tools (kind, helm, kubectl, task)
+      - Creates Kind cluster with proper port mappings
+      - Installs ingress controller
+      - Sets up Helm repositories
+    cmds:
+      - ./scripts/setup.sh
+    sources:
+      - kind-config.yaml
+      - scripts/setup.sh
+
+  start:
+    desc: Start development environment
+    summary: |
+      Daily startup command that ensures the development environment is ready:
+      - Verifies Kind cluster is running
+      - Checks ingress controller status
+      - Sets up kubectl context
+      - Shows environment information
+    deps: [setup]
+    cmds:
+      - ./scripts/start.sh
+    sources:
+      - scripts/start.sh
+
+  deploy:
+    desc: Deploy/upgrade application to Kubernetes
+    summary: |
+      Deploys the Langflow application stack using Helm:
+      - Updates Helm repositories
+      - Deploys/upgrades the chart with development values
+      - Waits for all deployments to be ready
+      - Shows access information
+    cmds:
+      - ./scripts/deploy.sh
+    deps: [start]
+    sources:
+      - helm/**/*
+      - values-dev.yaml
+      - scripts/deploy.sh
+
+  stop:
+    desc: Stop environment and cleanup
+    summary: |
+      Stops the development environment:
+      - Kills all port-forward processes
+      - Optionally uninstalls application (with --uninstall-app)
+      - Optionally destroys cluster (with --destroy-cluster)
+    cmds:
+      - ./scripts/stop.sh {{.CLI_ARGS}}
+    sources:
+      - scripts/stop.sh
+
+  restart:
+    desc: Restart the entire environment
+    summary: |
+      Convenience command to stop and start the environment:
+      - Stops port forwarding
+      - Restarts cluster services if needed
+      - Redeploys application
+    cmds:
+      - task: stop
+      - task: start
+      - task: deploy
+
+  status:
+    desc: Show cluster and deployment status
+    summary: |
+      Displays comprehensive status information:
+      - Cluster information
+      - Pod status
+      - Service endpoints
+      - Ingress status
+    cmds:
+      - echo "🏗️  Cluster Information:"
+      - kubectl cluster-info --context kind-{{.CLUSTER_NAME}} || echo "❌ Cluster not accessible"
+      - echo ""
+      - echo "📦 Pods Status:"
+      - kubectl get pods -n {{.NAMESPACE}} -o wide || echo "❌ Could not get pods"
+      - echo ""
+      - echo "🔗 Services:"
+      - kubectl get services -n {{.NAMESPACE}} || echo "❌ Could not get services"
+      - echo ""
+      - echo "🌐 Ingress:"
+      - kubectl get ingress -n {{.NAMESPACE}} 2>/dev/null || echo "ℹ️  No ingress resources found"
+      - echo ""
+      - echo "💾 Persistent Volume Claims:"
+      - kubectl get pvc -n {{.NAMESPACE}} || echo "ℹ️  No PVCs found"
+
+  logs:
+    desc: Show application logs
+    summary: |
+      Displays logs from the main Langflow application:
+      - Shows last 50 lines by default
+      - Follows logs in real-time
+      - Use Ctrl+C to exit
+    cmds:
+      - kubectl logs -l app.kubernetes.io/name={{.APP_NAME}} -n {{.NAMESPACE}} --tail=50 -f
+
+  logs-all:
+    desc: Show logs from all application components
+    summary: |
+      Shows logs from all components of the application stack:
+      - Langflow main application
+      - PostgreSQL database
+      - OpenWebUI (if enabled)
+      - MCP servers
+    cmds:
+      - echo "🔍 Langflow Application Logs:"
+      - kubectl logs -l app.kubernetes.io/name=langflow-app -n {{.NAMESPACE}} --tail=20 --prefix=true || true
+      - echo ""
+      - echo "🗄️  PostgreSQL Logs:"
+      - kubectl logs -l app.kubernetes.io/name=postgresql -n {{.NAMESPACE}} --tail=20 --prefix=true || true
+      - echo ""
+      - echo "📱 OpenWebUI Logs:"
+      - kubectl logs -l app.kubernetes.io/name=openwebui -n {{.NAMESPACE}} --tail=20 --prefix=true || true
+      - echo ""
+      - echo "🔧 MCP Server Logs:"
+      - kubectl logs -l app.kubernetes.io/component=mcp-server -n {{.NAMESPACE}} --tail=20 --prefix=true || true
+
+  shell:
+    desc: Open shell in running Langflow pod
+    summary: |
+      Opens an interactive shell session in the main Langflow pod:
+      - Automatically finds the running Langflow pod
+      - Opens /bin/bash if available, falls back to /bin/sh
+      - Useful for debugging and configuration
+    cmds:
+      - |
+        POD=$(kubectl get pods -l app.kubernetes.io/name={{.APP_NAME}} -n {{.NAMESPACE}} -o jsonpath='{.items[0].metadata.name}')
+        if [ -n "$POD" ]; then
+          echo "🐚 Opening shell in pod: $POD"
+          kubectl exec -it $POD -n {{.NAMESPACE}} -- /bin/bash || kubectl exec -it $POD -n {{.NAMESPACE}} -- /bin/sh
+        else
+          echo "❌ No Langflow pods found"
+          exit 1
+        fi
+
+  psql:
+    desc: Connect to PostgreSQL database
+    summary: |
+      Opens a PostgreSQL client session:
+      - Connects to the database using development credentials
+      - Provides direct access to query and manage data
+      - Useful for database debugging and maintenance
+    cmds:
+      - |
+        POD=$(kubectl get pods -l app.kubernetes.io/name=postgresql -n {{.NAMESPACE}} -o jsonpath='{.items[0].metadata.name}')
+        if [ -n "$POD" ]; then
+          echo "🗄️  Connecting to PostgreSQL in pod: $POD"
+          kubectl exec -it $POD -n {{.NAMESPACE}} -- psql -U langflow_user -d langflow_db
+        else
+          echo "❌ No PostgreSQL pods found"
+          exit 1
+        fi
+
+  clean:
+    desc: Full cleanup - destroy cluster and all data
+    summary: |
+      Performs complete environment cleanup:
+      - Uninstalls all Helm releases
+      - Destroys the Kind cluster
+      - Removes all persistent data
+      - Stops all port forwarding
+    confirm: Are you sure you want to destroy the entire cluster and all data?
+    cmds:
+      - task: stop
+        vars: {CLI_ARGS: "--destroy-cluster"}
+
+  reset:
+    desc: Reset application (keep cluster, redeploy app)
+    summary: |
+      Resets the application while keeping the cluster:
+      - Uninstalls the current Helm release
+      - Removes persistent volume claims
+      - Redeploys fresh application
+    cmds:
+      - echo "🔄 Resetting application..."
+      - helm uninstall {{.RELEASE_NAME}} -n {{.NAMESPACE}} --timeout 300s || true
+      - kubectl delete pvc --all -n {{.NAMESPACE}} --timeout=60s || true
+      - sleep 5
+      - task: deploy
+
+  update:
+    desc: Update Helm chart and redeploy
+    summary: |
+      Updates the application with latest chart changes:
+      - Updates Helm repositories
+      - Pulls latest images
+      - Upgrades the Helm release
+      - Shows deployment status
+    cmds:
+      - echo "📦 Updating Helm repositories..."
+      - helm repo update
+      - echo "🔄 Upgrading application..."
+      - task: deploy
+
+  validate:
+    desc: Validate Helm chart and Kubernetes manifests
+    summary: |
+      Validates the configuration without deploying:
+      - Lints the Helm chart
+      - Validates Kubernetes manifests
+      - Checks development values
+      - Performs dry-run deployment
+    cmds:
+      - echo "🔍 Validating Helm chart..."
+      - helm lint ./helm --strict
+      - echo ""
+      - echo "🧪 Testing template rendering..."
+      - helm template {{.RELEASE_NAME}} ./helm -f values-dev.yaml --dry-run --debug --namespace {{.NAMESPACE}}
+      - echo ""
+      - echo "✅ Validation completed successfully"
+
+  info:
+    desc: Show comprehensive environment information
+    summary: |
+      Displays detailed information about the development environment:
+      - Tool versions
+      - Cluster status
+      - Application endpoints
+      - Access credentials
+      - Useful commands
+    cmds:
+      - echo "=== Tool Versions ==="
+      - 'echo "Kind: $(kind version | head -n1)"'
+      - 'echo "Helm: $(helm version --short)"'
+      - 'echo "Task: $(task --version)"'
+      - echo ""
+      - echo "=== Cluster Status ==="
+      - 'kubectl cluster-info --context kind-{{.CLUSTER_NAME}} 2>/dev/null || echo "Cluster not accessible"'
+      - echo ""
+      - echo "=== Access URLs ==="
+      - 'echo "OpenWebUI: http://localhost:3000"'
+      - 'echo "Langflow: http://localhost:7860"'
+      - 'echo "Pipelines: http://localhost:9099"'
+      - 'echo "PostgreSQL: localhost:5432"'
+      - 'echo "Ingress HTTP: http://localhost:8080"'
+      - 'echo "Ingress HTTPS: https://localhost:8443"'
+      - echo ""
+      - echo "=== Credentials ==="
+      - 'echo "Langflow Admin: admin / admin123"'
+      - 'echo "PostgreSQL: langflow_user / devpassword"'
+      - echo ""
+      - echo "=== Useful Commands ==="
+      - 'echo "task start      # Start environment"'
+      - 'echo "task deploy     # Deploy application"'
+      - 'echo "task status     # Show status"'
+      - 'echo "task logs       # View logs"'
+      - 'echo "task shell      # Open pod shell"'
+      - 'echo "task expose:*   # Service exposure options"'
+
+  # Convenience aliases
+  up:
+    desc: "Alias for 'task start && task deploy'"
+    cmds:
+      - task: start
+      - task: deploy
+
+  down:
+    desc: "Alias for 'task stop'"
+    cmds:
+      - task: stop
+
+  ps:
+    desc: "Alias for 'task status'"
+    cmds:
+      - task: status
+
+  exec:
+    desc: "Alias for 'task shell'"
+    cmds:
+      - task: shell
