@@ -1,0 +1,133 @@
+# Development-specific values for langflow-app Helm chart
+# Optimized for Kind cluster with minimal resources and NodePort exposure
+
+# Minimal resources for development
+replicaCount: 1
+
+image:
+  repository: langflowai/langflow
+  pullPolicy: Always  # Always pull latest for development
+  tag: "latest"
+
+# Service configuration for NodePort exposure in Kind
+service:
+  type: NodePort
+  port: 7860
+  nodePort: 30001  # Maps to host port 7860 via Kind config
+
+# Enable ingress for local development
+ingress:
+  enabled: true
+  className: ""
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+  hosts:
+    - host: langflow.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+
+# Minimal resources for development
+resources:
+  limits:
+    memory: 1Gi
+  requests:
+    memory: 256Mi
+    cpu: 250m
+
+# PostgreSQL configuration for development
+postgresql:
+  enabled: true
+  auth:
+    database: langflow_db
+    username: langflow_user
+    password: "devpassword"  # Simple password for development
+    postgresPassword: "devpassword"
+  primary:
+    persistence:
+      enabled: true
+      size: 2Gi  # Smaller for development
+    service:
+      type: NodePort
+      nodePorts:
+        postgresql: 30003  # Maps to host port 5432 via Kind config
+    resources:
+      requests:
+        memory: 128Mi
+        cpu: 100m
+      limits:
+        memory: 256Mi
+
+# Enable MCP GitHub server for development
+mcpServers:
+  github-mcp:
+    enabled: true
+    replicas: 1
+    service:
+      type: NodePort
+      port: 9099
+      nodePort: 30002  # Maps to host port 9099 via Kind config
+    resources:
+      requests:
+        memory: 128Mi
+        cpu: 100m
+      limits:
+        memory: 256Mi
+    env:
+      - name: GITHUB_REPO_OWNER
+        value: "pawelrosada"  # Development repo owner
+    secrets:
+      GITHUB_PERSONAL_ACCESS_TOKEN: ""  # Set via environment or secrets
+  
+  filesystem-mcp:
+    enabled: false  # Disable for minimal setup
+  
+  brave-search-mcp:
+    enabled: false  # Disable for minimal setup
+
+# Enable OpenWebUI for complete development stack
+openwebui:
+  enabled: true
+  image:
+    repository: ghcr.io/open-webui/open-webui
+    tag: "main"
+    pullPolicy: Always
+  service:
+    type: NodePort
+    port: 8080
+    nodePort: 30000  # Maps to host port 3000 via Kind config
+  resources:
+    requests:
+      memory: 128Mi
+      cpu: 100m
+    limits:
+      memory: 256Mi
+  database:
+    usePostgreSQL: true
+    name: "openwebui_db"
+    separatePostgreSQL: false  # Use shared PostgreSQL
+
+# Development configuration
+config:
+  langflowConfigDir: "/app/langflow"
+  langflowAutoLogin: "true"  # Enable auto-login for development
+  langflowSuperuser: "admin"
+
+# Simple secrets for development
+secrets:
+  create: true
+  langflow:
+    superuserPassword: "admin123"
+  postgresql:
+    password: "devpassword"
+    postgresPassword: "devpassword"
+
+# No resource restrictions for development
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+# Disable autoscaling for development
+autoscaling:
+  enabled: false

@@ -1,0 +1,174 @@
+version: '3'
+
+# Application Exposure Taskfile
+# Advanced service exposure capabilities for easy testing and debugging
+
+vars:
+  APP_NAME: langflow-app
+  NAMESPACE: default
+  CLUSTER_NAME: langflow-dev
+
+tasks:
+  port-forward:
+    desc: Forward application port to localhost
+    vars:
+      LOCAL_PORT: '{{.LOCAL_PORT | default "8080"}}'
+      REMOTE_PORT: '{{.REMOTE_PORT | default "7860"}}'
+      SERVICE: '{{.SERVICE | default "langflow-app"}}'
+    cmds:
+      - 'echo "Port forwarding {{.SERVICE}}:{{.REMOTE_PORT}} -> localhost:{{.LOCAL_PORT}}"'
+      - 'echo "Press Ctrl+C to stop port forwarding"'
+      - kubectl port-forward svc/{{.SERVICE}} {{.LOCAL_PORT}}:{{.REMOTE_PORT}} -n {{.NAMESPACE}}
+    interactive: true
+
+  port-forward-all:
+    desc: Forward all main service ports simultaneously
+    cmds:
+      - 'echo "Starting port forwarding for all services..."'
+      - 'echo "Services will be available at:"'
+      - 'echo "  OpenWebUI: http://localhost:3000"'
+      - 'echo "  Langflow: http://localhost:7860"'
+      - 'echo "  Pipelines: http://localhost:9099"'
+      - 'echo "  PostgreSQL: localhost:5432"'
+      - 'echo ""'
+      - 'echo "Press Ctrl+C to stop all port forwarding"'
+      - |
+        # Start all port forwards in background
+        kubectl port-forward svc/{{.APP_NAME}} 7860:7860 -n {{.NAMESPACE}} &
+        PF1=$!
+        kubectl port-forward svc/{{.APP_NAME}}-openwebui 3000:8080 -n {{.NAMESPACE}} &
+        PF2=$!
+        kubectl port-forward svc/{{.APP_NAME}}-github-mcp 9099:9099 -n {{.NAMESPACE}} &
+        PF3=$!
+        kubectl port-forward svc/{{.APP_NAME}}-postgresql 5432:5432 -n {{.NAMESPACE}} &
+        PF4=$!
+        
+        # Wait for interrupt and cleanup
+        cleanup() {
+          echo ""
+          echo "Stopping all port forwarding..."
+          kill $PF1 $PF2 $PF3 $PF4 2>/dev/null || true
+          wait
+          echo "All port forwarding stopped"
+        }
+        trap cleanup INT
+        wait
+    interactive: true
+
+  nodeport:
+    desc: Expose application via NodePort
+    vars:
+      NODE_PORT: '{{.NODE_PORT | default "30001"}}'
+      SERVICE: '{{.SERVICE | default "langflow-app"}}'
+      PORT: '{{.PORT | default "7860"}}'
+    cmds:
+      - 'echo "Exposing {{.SERVICE}} via NodePort {{.NODE_PORT}}"'
+      - |
+        kubectl patch svc {{.SERVICE}} -n {{.NAMESPACE}} -p '{
+          "spec": {
+            "type": "NodePort",
+            "ports": [
+              {
+                "port": {{.PORT}},
+                "targetPort": {{.PORT}},
+                "nodePort": {{.NODE_PORT}},
+                "protocol": "TCP"
+              }
+            ]
+          }
+        }'
+      - 'echo "Service exposed at http://localhost:{{.NODE_PORT}}"'
+      - 'echo "Via Kind port mapping: http://localhost:7860 (if {{.NODE_PORT}} = 30001)"'
+
+  ingress:
+    desc: Create ingress for application
+    vars:
+      HOST: '{{.HOST | default "langflow.local"}}'
+      SERVICE: '{{.SERVICE | default "langflow-app"}}'
+      PORT: '{{.PORT | default "7860"}}'
+    cmds:
+      - 'echo "Creating ingress for {{.SERVICE}} with host {{.HOST}}"'
+      - |
+        cat <<EOF | kubectl apply -f -
+        apiVersion: networking.k8s.io/v1
+        kind: Ingress
+        metadata:
+          name: {{.SERVICE}}-ingress
+          namespace: {{.NAMESPACE}}
+          annotations:
+            nginx.ingress.kubernetes.io/rewrite-target: /
+        spec:
+          rules:
+          - host: {{.HOST}}
+            http:
+              paths:
+              - path: /
+                pathType: Prefix
+                backend:
+                  service:
+                    name: {{.SERVICE}}
+                    port:
+                      number: {{.PORT}}
+        EOF
+      - 'echo "Ingress created for {{.HOST}}"'
+      - 'echo "Add to /etc/hosts: 127.0.0.1 {{.HOST}}"'
+      - 'echo "Access at: http://{{.HOST}}:8080"'
+
+  expose-all:
+    desc: Show all current exposures and access methods
+    cmds:
+      - 'echo "=== Current Service Configuration ==="'
+      - kubectl get svc -n {{.NAMESPACE}} -o wide
+      - 'echo ""'
+      - 'echo "=== Available Access Methods ==="'
+      - 'echo "1. Direct NodePort Access (via Kind):"'
+      - 'echo "   OpenWebUI: http://localhost:3000"'
+      - 'echo "   Langflow: http://localhost:7860"'
+      - 'echo "   Pipelines: http://localhost:9099"'
+      - 'echo "   PostgreSQL: localhost:5432"'
+      - 'echo ""'
+      - 'echo "2. Port Forwarding:"'
+      - 'echo "   task expose:port-forward SERVICE=langflow-app LOCAL_PORT=8080"'
+      - 'echo "   task expose:port-forward-all"'
+      - 'echo ""'
+      - 'echo "3. Custom NodePort:"'
+      - 'echo "   task expose:nodeport NODE_PORT=30010 SERVICE=langflow-app"'
+      - 'echo ""'
+      - 'echo "4. Ingress (HTTP routing):"'
+      - 'echo "   task expose:ingress HOST=myapp.local SERVICE=langflow-app"'
+
+  cleanup:
+    desc: Remove all exposures and reset to ClusterIP
+    cmds:
+      - 'echo "Cleaning up all service exposures..."'
+      - |
+        # Reset main services to ClusterIP
+        for svc in {{.APP_NAME}} {{.APP_NAME}}-openwebui {{.APP_NAME}}-github-mcp {{.APP_NAME}}-postgresql; do
+          if kubectl get svc $svc -n {{.NAMESPACE}} >/dev/null 2>&1; then
+            echo "  Resetting $svc..."
+            kubectl patch svc $svc -n {{.NAMESPACE}} -p '{"spec":{"type":"ClusterIP"}}' || true
+          fi
+        done
+      - kubectl delete ingress --all -n {{.NAMESPACE}} --ignore-not-found=true
+      - pkill -f "kubectl port-forward" 2>/dev/null || true
+      - 'echo "All exposures cleaned up"'
+
+  debug:
+    desc: Debug network connectivity to application
+    vars:
+      SERVICE: '{{.SERVICE | default "langflow-app"}}'
+    cmds:
+      - 'echo "=== Network Debugging for {{.SERVICE}} ==="'
+      - kubectl get pods -l app.kubernetes.io/name={{.SERVICE}} -n {{.NAMESPACE}} -o wide || echo "No pods found"
+      - kubectl describe svc {{.SERVICE}} -n {{.NAMESPACE}} || echo "Service not found"
+      - kubectl get endpoints {{.SERVICE}} -n {{.NAMESPACE}} || echo "No endpoints"
+
+  # Convenience aliases
+  pf:
+    desc: "Alias for port-forward"
+    cmds:
+      - task: port-forward
+        vars:
+          LOCAL_PORT: '{{.LOCAL_PORT}}'
+          REMOTE_PORT: '{{.REMOTE_PORT}}'
+          SERVICE: '{{.SERVICE}}'

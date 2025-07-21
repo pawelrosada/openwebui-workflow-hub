@@ -1,0 +1,68 @@
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+name: langflow-dev
+nodes:
+- role: control-plane
+  kubeadmConfigPatches:
+  - |
+    kind: InitConfiguration
+    nodeRegistration:
+      kubeletExtraArgs:
+        node-labels: "ingress-ready=true"
+  extraPortMappings:
+  # OpenWebUI (HTTP)
+  - containerPort: 30000
+    hostPort: 3000
+    protocol: TCP
+  # Langflow UI (HTTP)
+  - containerPort: 30001
+    hostPort: 7860
+    protocol: TCP
+  # Pipelines API
+  - containerPort: 30002
+    hostPort: 9099
+    protocol: TCP
+  # PostgreSQL (for external access)
+  - containerPort: 30003
+    hostPort: 5432
+    protocol: TCP
+  # Standard Kubernetes ingress ports
+  - containerPort: 80
+    hostPort: 8080
+    protocol: TCP
+  - containerPort: 443
+    hostPort: 8443
+    protocol: TCP
+  # Additional NodePort range for service exposure
+  - containerPort: 30004
+    hostPort: 30004
+    protocol: TCP
+  - containerPort: 30005
+    hostPort: 30005
+    protocol: TCP
+  - containerPort: 30006
+    hostPort: 30006
+    protocol: TCP
+  - containerPort: 30007
+    hostPort: 30007
+    protocol: TCP
+  - containerPort: 30008
+    hostPort: 30008
+    protocol: TCP
+  - containerPort: 30009
+    hostPort: 30009
+    protocol: TCP
+networking:
+  # WARNING: It is _strongly_ recommended that you keep this the default
+  # (127.0.0.1) for security reasons. However it is possible to change this.
+  apiServerAddress: "127.0.0.1"
+  # By default the API server listens on a random open port.
+  # You may choose a specific port but probably don't need to in most cases.
+  # Using a random port makes it easier to spin up multiple clusters.
+  apiServerPort: 6443
+  podSubnet: "10.244.0.0/16"
+  serviceSubnet: "10.96.0.0/16"
+# Enable feature gates that might be useful for development
+featureGates:
+  "EphemeralContainers": true
+  "GracefulNodeShutdown": true

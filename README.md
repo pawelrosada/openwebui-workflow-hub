@@ -187,7 +187,9 @@ Persistent storage for:
 - Internet connection for model API access
 - **PostgreSQL Database**: Automatically configured via Docker Compose
 
-### Quick Start
+### Option 1: Docker Compose (Quick Start)
+
+#### Quick Start
 ```bash
 # Clone the repository
 git clone https://github.com/pawelrosada/langflow-ui.git
@@ -201,10 +203,203 @@ cd langflow-ui
 # LangFlow: http://localhost:7860
 ```
 
-### Clean Installation
+#### Clean Installation
 ```bash
 # Start with fresh data (removes all volumes)
 ./setup-openwebui.sh --clean
+```
+
+### Option 2: Kubernetes Development Platform (Kind + Helm)
+
+> 🚀 **Automated local Kubernetes development with advanced service exposure**
+
+#### Prerequisites
+- Docker (for Kind cluster)
+- 8GB+ RAM recommended for Kubernetes
+- Tools are auto-installed: Kind, Helm, kubectl, Task
+
+#### Quick Setup
+```bash
+# Clone the repository
+git clone https://github.com/pawelrosada/langflow-ui.git
+cd langflow-ui
+
+# One-time setup (installs tools + creates cluster)
+task setup
+
+# Start development environment
+task start
+
+# Deploy the application
+task deploy
+```
+
+#### Daily Development Workflow
+```bash
+# Start your development session
+task up            # Equivalent to: task start && task deploy
+
+# Check application status
+task status
+
+# View application logs
+task logs
+
+# Access applications via multiple methods:
+# 1. Direct NodePort access (via Kind port mapping):
+#    - OpenWebUI: http://localhost:3000
+#    - Langflow: http://localhost:7860
+#    - Pipelines: http://localhost:9099
+#    - PostgreSQL: localhost:5432
+
+# 2. Port forwarding (custom ports):
+task expose:port-forward SERVICE=langflow-app LOCAL_PORT=8080
+task expose:port-forward-all  # Forward all services simultaneously
+
+# 3. Ingress with custom domains:
+task expose:ingress HOST=langflow.local
+# Add to /etc/hosts: 127.0.0.1 langflow.local
+# Access at: http://langflow.local:8080
+
+# Stop environment
+task down          # Stop port forwarding only
+task stop --destroy-cluster  # Complete cleanup
+```
+
+#### Service Exposure Methods
+
+The Kubernetes platform provides multiple ways to access your services:
+
+**1. Direct Access (via Kind Port Mapping)**
+```bash
+# Already configured and ready to use:
+curl http://localhost:7860/api/v1/flows  # Langflow API
+curl http://localhost:3000               # OpenWebUI
+curl http://localhost:9099/health        # Pipelines health
+```
+
+**2. Port Forwarding (Flexible)**
+```bash
+# Forward single service with custom ports
+task expose:port-forward SERVICE=langflow-app LOCAL_PORT=8080 REMOTE_PORT=7860
+
+# Forward all services simultaneously
+task expose:port-forward-all
+
+# Custom service forwarding
+task expose:port-forward SERVICE=langflow-app-postgresql LOCAL_PORT=5433 REMOTE_PORT=5432
+```
+
+**3. NodePort Exposure**
+```bash
+# Expose with custom NodePort
+task expose:nodeport NODE_PORT=30010 SERVICE=langflow-app
+
+# Access via: http://localhost:30010
+```
+
+**4. Ingress (Domain-based Routing)**
+```bash
+# Create ingress for single service
+task expose:ingress HOST=myapp.local SERVICE=langflow-app
+
+# Create ingress for all services
+task expose:ingress-all
+# Adds: langflow.local, openwebui.local, api.local
+
+# Add to /etc/hosts and access via: http://langflow.local:8080
+```
+
+**5. Debugging and Connectivity**
+```bash
+# Debug network connectivity
+task expose:debug SERVICE=langflow-app
+
+# Test all service connectivity
+task expose:test-connectivity
+
+# Show all current exposures and options
+task expose:expose-all
+
+# Reset all exposures to ClusterIP
+task expose:cleanup
+```
+
+#### Available Tasks
+
+```bash
+# Environment Management
+task setup         # Initial setup (one-time)
+task start         # Start development environment
+task deploy        # Deploy/upgrade application
+task stop          # Stop environment
+task clean         # Destroy cluster and all data
+task restart       # Restart entire environment
+
+# Application Management
+task status        # Show cluster and deployment status
+task logs          # Show application logs
+task logs-all      # Show logs from all components
+task shell         # Open shell in Langflow pod
+task psql          # Connect to PostgreSQL database
+
+# Development Tools
+task validate      # Validate Helm chart and manifests
+task update        # Update Helm chart and redeploy
+task reset         # Reset application (keep cluster)
+task info          # Show comprehensive environment info
+
+# Service Exposure (see expose:* tasks above)
+task expose:port-forward        # Port forwarding
+task expose:nodeport           # NodePort exposure
+task expose:ingress            # Ingress creation
+task expose:expose-all         # Show all methods
+task expose:cleanup            # Reset exposures
+task expose:debug             # Debug connectivity
+
+# Quick Aliases
+task up            # start + deploy
+task down          # stop
+task ps            # status
+task exec          # shell
+```
+
+#### Troubleshooting
+
+**Cluster Issues:**
+```bash
+# Check cluster status
+task info
+
+# Recreate cluster
+task clean && task setup
+
+# View cluster logs
+kubectl get events --sort-by='.lastTimestamp'
+```
+
+**Application Issues:**
+```bash
+# Check pod status
+task status
+
+# View specific pod logs
+kubectl logs <pod-name> -n default
+
+# Debug service connectivity
+task expose:debug SERVICE=langflow-app
+
+# Reset application
+task reset
+```
+
+**Port Conflicts:**
+```bash
+# Check what's using ports
+netstat -tlnp | grep :3000
+
+# Use different local ports
+task expose:port-forward LOCAL_PORT=3001 SERVICE=langflow-app-openwebui
 ```
 
 ## Usage
