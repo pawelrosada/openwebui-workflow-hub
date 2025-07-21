@@ -135,7 +135,7 @@ jobs:
           cp -r helm charts/langflow-app
 
       - name: Run chart-releaser
-        uses: helm/chart-releaser-action@v1.6.0
+        uses: helm/chart-releaser-action@v1.7.0
         with:
           charts_dir: charts
           config: .github/configs/cr.yaml
