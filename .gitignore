@@ -215,6 +215,9 @@ env/
 .cr-release-packages/
 charts/
 
+# Task checksum cache
+.task/
+
 #pipeline generated files
 pipelines/langflow_*
 pipelines/pipeline_generator/valves.json
