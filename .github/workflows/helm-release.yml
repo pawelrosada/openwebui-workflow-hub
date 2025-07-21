@@ -144,7 +144,7 @@ jobs:
 
       - name: Setup Pages
         if: success()
-        uses: actions/configure-pages@v4
+        uses: actions/configure-pages@v5
 
       - name: Upload Pages artifact
         if: success()
