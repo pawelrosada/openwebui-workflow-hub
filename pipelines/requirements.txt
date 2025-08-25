@@ -1,4 +1,4 @@
-requests==2.31.0
+requests==2.32.5
 aiohttp==3.12.14
 httpx==0.25.2
 pydantic==2.11.7
