@@ -42,7 +42,7 @@ services:
       - langflow-data:/app/langflow
 
   postgres:
-    image: postgres:17
+    image: postgres:18
     environment:
       POSTGRES_USER: langflow
       POSTGRES_PASSWORD: langflow
